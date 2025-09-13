@@ -35,6 +35,19 @@ class JobApplicationListSerializer(serializers.ModelSerializer):
         exclude = ['meeting_minutes']  # assuming this is a field you added
         read_only_fields = ('user', 'created_at', 'updated_at')
 
+    def create(self, validated_data):
+        # Automatically assign the user from the request context
+        # For development, create a default user if none exists
+        user = self.context['request'].user
+        if not user.is_authenticated:
+            from django.contrib.auth.models import User
+            user, created = User.objects.get_or_create(
+                username='halalkingxi',
+                defaults={'email': 'rik@ualberta.ca', 'first_name': 'Rik', 'last_name': 'Mukherji'}
+            )
+        validated_data['user'] = user
+        return super().create(validated_data)
+
 
 class JobApplicationDetailSerializer(serializers.ModelSerializer):
     meetingnote_set = MeetingNoteSerializer(many=True, read_only=True)
@@ -45,6 +58,16 @@ class JobApplicationDetailSerializer(serializers.ModelSerializer):
         read_only_fields = ('user', 'created_at', 'updated_at')
 
     def create(self, validated_data):
+        # Automatically assign the user from the request context
+        # For development, create a default user if none exists
+        user = self.context['request'].user
+        if not user.is_authenticated:
+            from django.contrib.auth.models import User
+            user, created = User.objects.get_or_create(
+                username='halalkingxi',
+                defaults={'email': 'rik@ualberta.ca', 'first_name': 'Rik', 'last_name': 'Mukherji'}
+            )
+        validated_data['user'] = user
         return super().create(validated_data)
 
     def validate_applied_date(self, value):
