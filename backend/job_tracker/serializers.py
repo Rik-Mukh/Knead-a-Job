@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import JobApplication, Resume, MeetingNote, Notification
-
+from django.contrib.auth.models import User
 
 class MeetingNoteSerializer(serializers.ModelSerializer):
     """
@@ -105,7 +105,16 @@ class ResumeSerializer(serializers.ModelSerializer):
         return value
 
 
-# -------------------------------
+class UserSerializer(serializers.ModelSerializer):
+    """
+    Serializer for User model.
+    
+    Provides basic user information for the frontend.
+    """
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'date_joined']
+        read_only_fields = ['id', 'date_joined']# -------------------------------
 # Notification Serializer
 # -------------------------------
 

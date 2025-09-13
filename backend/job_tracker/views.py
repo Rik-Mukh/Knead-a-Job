@@ -14,6 +14,9 @@ from datetime import timedelta
 from .models import JobApplication, Resume, MeetingNote, Notification
 from .serializers import JobApplicationListSerializer, JobApplicationDetailSerializer, ResumeSerializer, MeetingNoteSerializer, NotificationSerializer
 
+from .serializers import UserSerializer
+from django.contrib.auth.models import User
+
 
 class JobApplicationViewSet(viewsets.ModelViewSet):
     """
@@ -335,3 +338,26 @@ class NotificationViewSet(viewsets.ModelViewSet):
         queryset = self.get_queryset()
         unread_count = queryset.filter(is_read=False).count()
         return Response({'unread_count': unread_count})
+
+class UserViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    ViewSet for User model.
+    
+    Provides read-only access to user information.
+    """
+    serializer_class = UserSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get_queryset(self):
+        """
+        Return only the current authenticated user.
+        """
+        return User.objects.filter(id=self.request.user.id)
+    
+    @action(detail=False, methods=['get'])
+    def current(self, request):
+        """
+        Get the current authenticated user.
+        """
+        serializer = self.get_serializer(request.user)
+        return Response(serializer.data)

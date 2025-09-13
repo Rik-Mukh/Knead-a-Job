@@ -42,7 +42,7 @@ const Timeline = ({ isOpen, onClose, application }) => {
                   {new Date(application[e.key]).toLocaleDateString(undefined, {
                     year: "numeric",
                     month: "short",
-                    day: "numeric",
+                    day: "numeric", 
                   })}
                 </div>
               </div>
