@@ -16,7 +16,7 @@ const NotificationsPage = () => {
 
   return (
     <div style={{ padding: '36px', maxWidth: '800px', margin: '0 auto' }}>
-      <h1 style={{ marginBottom: '20px' }}>Notifications</h1>
+      <h1 style={{ marginBottom: '20px', font: "normal 500 2rem helvetica-neue-lt-pro" }}>Notifications</h1>
       {notifications.length === 0 ? (
         <p>No notifications</p>
       ) : (

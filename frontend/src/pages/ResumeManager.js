@@ -74,7 +74,9 @@ const ResumeManager = () => {
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-        <h2>Resume Manager</h2>
+        <h2 style={{
+          font: "normal 500 2rem helvetica-neue-lt-pro"
+        }}>Resume Manager</h2>
         <button 
           onClick={() => setShowUploadForm(true)}
           className="btn btn-primary"
