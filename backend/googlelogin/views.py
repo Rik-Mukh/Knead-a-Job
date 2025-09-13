@@ -31,7 +31,7 @@ def get_csrf_token(request):
 
 def auth_success(request):
     """Handle successful Google authentication"""
-    return redirect('http://localhost:3000/auth-success')
+    return redirect('http://localhost:3000/dashboard')
 
 @login_required
 def test_gmail(request):
