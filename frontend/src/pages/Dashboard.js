@@ -14,8 +14,8 @@ const STATUS_MAP = {
 const STATCARD_MAP = {
   applied: { label: "Job", color: "#efefef" },
   interview: { label: "Interview", color: "#c8f1ff" },
-  rejected: { label: "Rejection", color: "#e1ffcd", },
-  offer: { label: "Offer", color: "#ffcdcd" }
+  rejected: { label: "Rejection", color: "#ffcdcd", },
+  offer: { label: "Offer", color: "#e1ffcd" }
 }
 
 
@@ -110,11 +110,11 @@ const Dashboard = () => {
       ); 
 
       // getting dashboard card data
-      filterApplications(stats => {
-        stats.applied = sorted.length;
-        stats.interviews = sorted.filter((app) => (app.status === "interviews")).length;
-        stats.rejected= sorted.filter((app) => (app.status === "rejected")).length;
-        stats.offers = sorted.filter((app) => (app.status === "offers")).length;
+      filterApplications({
+        applied: sorted.length,
+        interviews: sorted.filter((app) => (app.status === "interviews")).length,
+        rejected: sorted.filter((app) => (app.status === "rejected")).length,
+        offers: sorted.filter((app) => (app.status === "offers")).length,
       })
 
 
