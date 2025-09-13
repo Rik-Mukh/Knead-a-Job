@@ -160,7 +160,7 @@ const Dashboard = () => {
 
   return (
     <div className="dashboard-wrap" style={{ position: "relative" }}>
-      {hasOffer && <Confetti width={width} height={height} numberOfPieces={200} recycle={false} />}
+      {hasOffer && <Confetti width="100%" height="100%" numberOfPieces={200} recycle={false} />}
 
       {/* Hero */}
       <div className="dashboard-hero">
