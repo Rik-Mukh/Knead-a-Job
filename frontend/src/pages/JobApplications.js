@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { applicationService } from '../services/applicationService';
 import ApplicationCard from '../components/ApplicationCard';
 import JobApplicationForm from '../components/JobApplicationForm';
+import MeetingMinutesForm from '../components/MeetingMinutesForm';
 
 const JobApplications = () => {
   const [applications, setApplications] = useState([]);
@@ -10,7 +11,7 @@ const JobApplications = () => {
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedApplicationForTracking, setSelectedApplicationForTracking] = useState(null);
-  const [meetingMinutes, setMeetingMinutes] = useState('');
+  const [selectedApplicationForMeetingMinutes, setSelectedApplicationForMeetingMinutes] = useState(null);
 
 
   useEffect(() => {
@@ -74,6 +75,20 @@ const JobApplications = () => {
     setSelectedApplicationForTracking(application);
     setShowForm(false);
     setEditingApplication(null);
+  };
+
+  const handleAddMeetingMinutes = (application) => {
+    setSelectedApplicationForMeetingMinutes(application);
+    setShowForm(false);
+    setEditingApplication(null);
+  };
+
+  const handleCloseMeetingMinutes = () => {
+    setSelectedApplicationForMeetingMinutes(null);
+  };
+
+  const handleMeetingMinutesSuccess = () => {
+    fetchApplications(); // Refresh the applications list
   };
   
 
@@ -143,6 +158,7 @@ const JobApplications = () => {
               onEdit={handleEdit}
               onDelete={handleDeleteApplication}
               onTrack={handleTrackApplication}
+              onAddMeetingMinutes={handleAddMeetingMinutes}
             />
           ))}
         </div>
@@ -164,6 +180,15 @@ const JobApplications = () => {
             </button>
           )}
         </div>
+      )}
+
+      {/* Meeting Minutes Form Modal */}
+      {selectedApplicationForMeetingMinutes && (
+        <MeetingMinutesForm
+          application={selectedApplicationForMeetingMinutes}
+          onClose={handleCloseMeetingMinutes}
+          onSuccess={handleMeetingMinutesSuccess}
+        />
       )}
     </div>
   );

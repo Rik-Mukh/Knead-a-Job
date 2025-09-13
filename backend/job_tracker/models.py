@@ -121,3 +121,21 @@ class Resume(models.Model):
                 size /= 1024.0
             return f"{size:.1f} TB"
         return "Unknown"
+
+
+class MeetingNote(models.Model):
+    """
+    Model representing a meeting note.
+    
+    This model stores information about meeting notes related to a job application.
+    """
+    job_application = models.ForeignKey(JobApplication, on_delete=models.CASCADE, help_text="Job application related to this meeting note")
+    content = models.TextField(help_text="Content of the meeting note")
+
+    # Timestamps
+    created_at = models.DateTimeField(auto_now_add=True, help_text="When this meeting note was created")
+    updated_at = models.DateTimeField(auto_now=True, help_text="When this meeting note was last updated")
+    
+    class Meta:
+        # Order meeting notes by creation date (most recent first)
+        ordering = ['-created_at']

@@ -1,6 +1,6 @@
 import React from 'react';
 
-const ApplicationCard = ({ application, onEdit, onDelete, onTrack }) => {
+const ApplicationCard = ({ application, onEdit, onDelete, onTrack, onAddMeetingMinutes }) => {
   const getStatusColor = (status) => {
     switch (status) {
       case 'applied': return '#17a2b8';
@@ -67,7 +67,7 @@ const ApplicationCard = ({ application, onEdit, onDelete, onTrack }) => {
         </div>
       )}
       
-      <div style={{ marginTop: '16px', display: 'flex', gap: '8px' }}>
+      <div style={{ marginTop: '16px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
         <button 
           onClick={() => onEdit(application)}
           className="btn btn-secondary"
@@ -83,7 +83,14 @@ const ApplicationCard = ({ application, onEdit, onDelete, onTrack }) => {
           Delete
         </button>
         <button 
-          onClick={() => onTrack(application.id)}
+          onClick={() => onAddMeetingMinutes(application)}
+          className="btn btn-info"
+          style={{ padding: '6px 12px', fontSize: '12px' }}
+        >
+          Add Meeting Minutes
+        </button>
+        <button 
+          onClick={() => onTrack(application)}
           className="btn btn-outline-primary"
           style={{ padding: '6px 12px', fontSize: '12px' }}
         >

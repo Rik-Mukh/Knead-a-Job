@@ -6,7 +6,7 @@ Serializers handle the conversion between model instances and JSON data for API 
 """
 
 from rest_framework import serializers
-from .models import JobApplication, Resume
+from .models import JobApplication, Resume, MeetingNote
 
 # two serializers for the job application model so that meeting mins doesn't show on the dashboard appear on dashbaord
     # For Dashboard/List views – hides meeting_minutes
@@ -110,3 +110,41 @@ class ResumeSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Only PDF, DOC, and DOCX files are allowed.")
         
         return value
+
+
+class MeetingNoteSerializer(serializers.ModelSerializer):
+    """
+    Serializer for MeetingNote model.
+    
+    Handles serialization and deserialization of meeting note data.
+    """
+    
+    class Meta:
+        model = MeetingNote
+        fields = ['id', 'job_application', 'content', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'created_at', 'updated_at']
+    
+    def create(self, validated_data):
+        """
+        Override create method to handle job_application assignment.
+        """
+        print(f"DEBUG: MeetingNoteSerializer.create called with: {validated_data}")
+        return super().create(validated_data)
+    
+    def validate_content(self, value):
+        """
+        Validate the meeting note content.
+        
+        Args:
+            value: The content value
+            
+        Returns:
+            str: The validated content
+            
+        Raises:
+            serializers.ValidationError: If the content is invalid
+        """
+        if not value or not value.strip():
+            raise serializers.ValidationError("Meeting note content cannot be empty.")
+        return value.strip()
+

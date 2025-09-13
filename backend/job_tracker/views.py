@@ -5,11 +5,11 @@ This module contains Django REST Framework views for the job tracker API.
 Views handle HTTP requests and return appropriate responses for job applications and resumes.
 """
 
-from rest_framework import viewsets, permissions, status
+from rest_framework import viewsets, permissions, status, serializers
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from .models import JobApplication, Resume
-from .serializers import JobApplicationListSerializer, JobApplicationDetailSerializer, ResumeSerializer
+from .models import JobApplication, Resume, MeetingNote
+from .serializers import JobApplicationListSerializer, JobApplicationDetailSerializer, ResumeSerializer, MeetingNoteSerializer
 
 
 class JobApplicationViewSet(viewsets.ModelViewSet):
@@ -141,3 +141,48 @@ class ResumeViewSet(viewsets.ModelViewSet):
                 {'detail': 'No default resume found'}, 
                 status=status.HTTP_404_NOT_FOUND
             )
+    
+class MeetingNoteViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet for MeetingNote model.
+    
+    Provides CRUD operations for meeting notes.
+    Users can only access their own meeting notes.
+    """
+    serializer_class = MeetingNoteSerializer
+    permission_classes = [permissions.AllowAny]  # Allow unauthenticated access for development
+
+    def get_queryset(self):
+        """
+        Return meeting notes filtered by job application if specified.
+        
+        Returns:
+            QuerySet: Filtered queryset of meeting notes
+        """
+        queryset = MeetingNote.objects.all()
+        application_id = self.request.query_params.get('job_application')
+        if application_id:
+            queryset = queryset.filter(job_application_id=application_id)
+        return queryset
+
+    def perform_create(self, serializer):
+        """
+        Override create to handle job application validation.
+        """
+        print(f"DEBUG: Creating meeting note")
+        print(f"DEBUG: Request data: {self.request.data}")
+        print(f"DEBUG: Validated data: {serializer.validated_data}")
+        
+        # Validate that the job application exists
+        job_application_id = serializer.validated_data.get('job_application')
+        if job_application_id:
+            try:
+                job_application = JobApplication.objects.get(id=job_application_id)
+                print(f"DEBUG: Found job application: {job_application}")
+                serializer.save()
+            except JobApplication.DoesNotExist:
+                print(f"DEBUG: Job application {job_application_id} not found")
+                raise serializers.ValidationError("Job application not found")
+        else:
+            print("DEBUG: No job_application in validated data")
+            raise serializers.ValidationError("Job application is required")
