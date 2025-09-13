@@ -16,16 +16,27 @@ const ApplicationCard = ({ application, onEdit, onDelete, onTrack, onAddMeetingM
     return new Date(dateString).toLocaleDateString();
   };
 
+  const handleCardClick = () => {
+    if (application.job_url) {
+      window.open(application.job_url, '_blank');
+    }
+  };
+
   return (
-    <div className="card"  style={{
-            marginTop: '40px',
-            border: '1.5px solid black',
-            borderRadius: '24px',
-            padding: '24px',
-            backgroundColor: '#fff',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-          }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', }}>
+    <div
+      className="card"
+      onClick={handleCardClick}
+      style={{
+        marginTop: '40px',
+        border: '1.5px solid black',
+        borderRadius: '24px',
+        padding: '24px',
+        backgroundColor: '#fff',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+        cursor: application.job_url ? 'pointer' : 'default',
+      }}
+    >
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <div>
           <h4 style={{ margin: '0 0 8px 0' }}>{application.position}</h4>
           <p style={{ margin: '0 0 8px 0', color: '#666' }}>{application.company_name}</p>
@@ -40,7 +51,6 @@ const ApplicationCard = ({ application, onEdit, onDelete, onTrack, onAddMeetingM
           <span
             style={{
               backgroundColor: getStatusColor(application.status),
-              color: 'white',
               padding: '4px 8px',
               borderRadius: '12px',
               fontSize: '12px',
@@ -55,50 +65,37 @@ const ApplicationCard = ({ application, onEdit, onDelete, onTrack, onAddMeetingM
           </p>
         </div>
       </div>
-      
+
       {application.notes && (
         <div style={{ marginTop: '12px' }}>
           <p style={{ margin: '0', fontSize: '14px' }}>{application.notes}</p>
         </div>
       )}
-      
-      {application.job_url && (
-        <div style={{ marginTop: '12px' }}>
-          <a 
-            href={application.job_url} 
-            target="_blank" 
-            rel="noopener noreferrer"
-            style={{ color: '#007bff', textDecoration: 'none' }}
-          >
-            View Job Posting →
-          </a>
-        </div>
-      )}
-      
+
       <div style={{ marginTop: '16px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-        <button 
-          onClick={() => onEdit(application)}
+        <button
+          onClick={(e) => { e.stopPropagation(); onEdit(application); }}
           className="btn btn-secondary"
           style={{ padding: '6px 12px', fontSize: '12px' }}
         >
           Edit
         </button>
-        <button 
-          onClick={() => onDelete(application.id)}
+        <button
+          onClick={(e) => { e.stopPropagation(); onDelete(application.id); }}
           className="btn btn-danger"
           style={{ padding: '6px 12px', fontSize: '12px' }}
         >
           Delete
         </button>
-        <button 
-          onClick={() => onAddMeetingMinutes(application)}
+        <button
+          onClick={(e) => { e.stopPropagation(); onAddMeetingMinutes(application); }}
           className="btn btn-info"
           style={{ padding: '6px 12px', fontSize: '12px' }}
         >
           Add Meeting Minutes
         </button>
-        <button 
-          onClick={() => onTrack(application)}
+        <button
+          onClick={(e) => { e.stopPropagation(); onTrack(application); }}
           className="btn btn-outline-primary"
           style={{ padding: '6px 12px', fontSize: '12px' }}
         >

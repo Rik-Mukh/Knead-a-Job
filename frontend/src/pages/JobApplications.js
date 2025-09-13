@@ -99,7 +99,7 @@ const JobApplications = () => {
   if (loading) {
     return (
       <div style={{ textAlign: 'center', padding: '40px' }}>
-        <h2>Job Applications</h2>
+        <h1>Job Applications</h1>
         <p>Loading...</p>
       </div>
     );
@@ -109,7 +109,7 @@ const JobApplications = () => {
     <div style={{ padding: '20px' }}>
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-        <h2>Job Applications</h2>
+        <h1>Job Applications</h1>
         <button onClick={() => setShowForm(true)} className="btn btn-primary">
           Add Application
         </button>
@@ -122,7 +122,7 @@ const JobApplications = () => {
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
           className="form-control"
-          style={{ width: '200px', display: 'inline-block', marginLeft: '10px' }}
+          style={{ width: '200px', display: 'inline-block',}}
         >
           <option value="all">All</option>
           <option value="applied">Applied</option>
