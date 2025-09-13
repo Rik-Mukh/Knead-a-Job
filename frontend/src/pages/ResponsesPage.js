@@ -56,7 +56,7 @@ const ResponsesPage = () => {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px',  }}>
         <h1>Responses / Meeting Minutes</h1>
         <button 
           onClick={fetchResponses}
