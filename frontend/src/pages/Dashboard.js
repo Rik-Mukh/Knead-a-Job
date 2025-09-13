@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { applicationService } from "../services/applicationService";
-import { resumeService } from "../services/resumeService";
+import Timeline from "../components/Timeline"; 
+import { mockApplications, mockResume } from "./TestData";
 import "./Dashboard.css";
 
 const STATUS_MAP = {
-  offer: { label: "Offer", color: "#28a745" },
-  applied: { label: "Applied", color: "#6c757d" },
-  interview: { label: "Interview", color: "#17a2b8" },
-  rejected: { label: "Rejected", color: "#dc3545" },
+  offer: { label: "Offer", color: "#E1FFCD" },
+  applied: { label: "Applied", color: "#EFEFEF" },
+  interview: { label: "Interview", color: "#C8F1FF" },
+  rejected: { label: "Rejected", color: "#FFCDCD" },
   withdrawn: { label: "Withdrawn", color: "#6c757d" },
 };
 
@@ -77,6 +77,7 @@ const Dashboard = () => {
   const [recentApplications, setRecentApplications] = useState([]);
   const [defaultResume, setDefaultResume] = useState(null);
   const [loading, setLoading] = useState(true);
+
   const [stats, filterApplications] = useState({
     applied: 0,
     interviews: 0,
@@ -84,9 +85,16 @@ const Dashboard = () => {
     offers: 0
   })
 
+  const [selectedApp, setSelectedApp] = useState(null);
+
+
   useEffect(() => {
-    fetchDashboardData();
+    // ✅ Using mock data instead of API
+    setRecentApplications(mockApplications);
+    setDefaultResume(mockResume);
+    setLoading(false);
   }, []);
+
 
   const fetchDashboardData = async () => {
     try {
@@ -181,7 +189,11 @@ const Dashboard = () => {
               </tr>
             )}
             {recentApplications.map((app) => (
-              <tr key={app.id || app.company_name + app.applied_date}>
+              <tr
+                key={app.id || app.company_name + app.applied_date}
+                onClick={() => setSelectedApp(app)}
+                style={{ cursor: "pointer" }}
+              >
                 <td className="company-cell">{app.company_name}</td>
                 <td>{app.position}</td>
                 <td>{formatDate(app.applied_date)}</td>
@@ -194,6 +206,7 @@ const Dashboard = () => {
                     href={app.resume_url || "#"}
                     target="_blank"
                     rel="noopener noreferrer"
+                    onClick={(e) => e.stopPropagation()} // ✅ prevents row click
                   >
                     {app.resume_file || "Resume.pdf"}
                   </a>
@@ -204,7 +217,7 @@ const Dashboard = () => {
         </table>
       </div>
 
-      {/* Default Resume card (optional, under the table) */}
+      {/* Default Resume card (optional) */}
       {defaultResume && (
         <div style={{ marginTop: "24px" }}>
           <div className="table-card">
@@ -212,12 +225,23 @@ const Dashboard = () => {
             <p style={{ margin: "0 0 8px 0", color: "#666", fontSize: "14px" }}>
               Uploaded: {formatDate(defaultResume.created_at)}
             </p>
-            <button className="btn btn-primary" style={{ fontSize: "14px" }}>
+            <button
+              className="btn btn-primary"
+              style={{ fontSize: "14px" }}
+              onClick={() => window.open(defaultResume.file_url, "_blank")}
+            >
               Download Resume
             </button>
           </div>
         </div>
       )}
+
+      {/* ✅ Timeline popup */}
+      <Timeline
+        isOpen={!!selectedApp}
+        onClose={() => setSelectedApp(null)}
+        application={selectedApp}
+      />
     </div>
   );
 };

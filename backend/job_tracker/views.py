@@ -5,11 +5,11 @@ This module contains Django REST Framework views for the job tracker API.
 Views handle HTTP requests and return appropriate responses for job applications and resumes.
 """
 
-from rest_framework import viewsets, permissions, status
+from rest_framework import viewsets, permissions, status, serializers
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from .models import JobApplication, Resume
-from .serializers import JobApplicationSerializer, ResumeSerializer
+from .models import JobApplication, Resume, MeetingNote
+from .serializers import JobApplicationListSerializer, JobApplicationDetailSerializer, ResumeSerializer, MeetingNoteSerializer
 
 
 class JobApplicationViewSet(viewsets.ModelViewSet):
@@ -19,10 +19,14 @@ class JobApplicationViewSet(viewsets.ModelViewSet):
     Provides CRUD operations for job applications.
     Users can only access their own applications.
     """
-    
-    serializer_class = JobApplicationSerializer
+    # Replace with IsAuthenticated later
     permission_classes = [permissions.AllowAny]  # Allow unauthenticated access for development
     pagination_class = None
+
+    def get_serializer_class(self):
+        if self.action in ['retrieve', 'update', 'partial_update']:
+            return JobApplicationDetailSerializer  # Show full fields
+        return JobApplicationListSerializer  # List view hides meeting_minutes
     
     def get_queryset(self):
         """
@@ -68,7 +72,8 @@ class JobApplicationViewSet(viewsets.ModelViewSet):
         except (ValueError, TypeError):
             limit = 5
         
-        recent_applications = self.get_queryset()[:limit]
+        # recent_applications = self.get_queryset()[:limit]
+        recent_applications = self.get_queryset().order_by('-created_at')[:limit]
         serializer = self.get_serializer(recent_applications, many=True)
         return Response(serializer.data)
 
@@ -91,7 +96,7 @@ class ResumeViewSet(viewsets.ModelViewSet):
         Returns:
             QuerySet: Filtered queryset of resumes
         """
-        return JobApplication.objects.all()
+        return Resume.objects.all()
         
     
     @action(detail=True, methods=['post'])
@@ -136,3 +141,40 @@ class ResumeViewSet(viewsets.ModelViewSet):
                 {'detail': 'No default resume found'}, 
                 status=status.HTTP_404_NOT_FOUND
             )
+    
+class MeetingNoteViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet for MeetingNote model.
+    
+    Provides CRUD operations for meeting notes.
+    Users can only access their own meeting notes.
+    """
+    serializer_class = MeetingNoteSerializer
+    permission_classes = [permissions.AllowAny]  # Allow unauthenticated access for development
+
+    def get_queryset(self):
+        """
+        Return meeting notes filtered by job application if specified.
+        
+        Returns:
+            QuerySet: Filtered queryset of meeting notes
+        """
+        # For now, return all meeting notes since we're using AllowAny permissions
+        # TODO: Filter by user when authentication is implemented
+        queryset = MeetingNote.objects.all()
+        application_id = self.kwargs.get('application_id')
+        if application_id:
+            queryset = queryset.filter(job_application_id=application_id)
+        return queryset
+
+    def perform_create(self, serializer):
+        """
+        Override create to validate the job application exists.
+        """
+        # Get the job_application from the validated data
+        job_application = serializer.validated_data.get('job_application')
+        if job_application:
+            # job_application is already a JobApplication instance from the serializer
+            serializer.save()
+        else:
+            raise serializers.ValidationError("Job application is required")

@@ -7,7 +7,7 @@ It uses Django REST Framework routers to automatically generate URLs for the Vie
 
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import JobApplicationViewSet, ResumeViewSet
+from .views import JobApplicationViewSet, ResumeViewSet, MeetingNoteViewSet
 
 # Create a router instance
 router = DefaultRouter()
@@ -16,6 +16,7 @@ router = DefaultRouter()
 # This automatically creates URL patterns for CRUD operations
 router.register(r'applications', JobApplicationViewSet, basename='application')
 router.register(r'resumes', ResumeViewSet, basename='resume')
+router.register(r'meeting-notes', MeetingNoteViewSet, basename='meeting-note')
 
 # URL patterns for the job tracker app
 urlpatterns = [

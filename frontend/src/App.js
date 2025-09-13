@@ -11,6 +11,7 @@ import Navbar from './components/Navbar';
 import Dashboard from './pages/Dashboard';
 import JobApplications from './pages/JobApplications';
 import ResumeManager from './pages/ResumeManager';
+import NotificationsPage from './pages/NotificationsPage'; // <-- import added
 
 /**
  * App Component
@@ -38,6 +39,9 @@ function App() {
             
             {/* Resume manager route - manage resume files */}
             <Route path="/resumes" element={<ResumeManager />} />
+            
+            {/* Notifications route */}
+            <Route path="/notifications" element={<NotificationsPage />} />
           </Routes>
         </div>
       </div>

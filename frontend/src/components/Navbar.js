@@ -1,8 +1,11 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
 const Navbar = () => {
   const location = useLocation();
+
+  // Example: unread notifications count
+  const [unreadCount, setUnreadCount] = useState(3); // you can fetch this from backend
 
   const isActive = (path) => location.pathname === path;
 
@@ -22,7 +25,7 @@ const Navbar = () => {
         </Link>
 
         {/* Navigation links */}
-        <ul style={{ display: 'flex', listStyle: 'none', margin: 0, padding: 0, gap: '48px' }}>
+        <ul style={{ display: 'flex', listStyle: 'none', margin: 0, padding: 0, gap: '48px', alignItems: 'center' }}>
           <li>
             <Link 
               to="/" 
@@ -60,6 +63,37 @@ const Navbar = () => {
               }}
             >
               Resumes
+            </Link>
+          </li>
+
+          {/* Notifications link */}
+          <li style={{ position: 'relative' }}>
+            <Link 
+              to="/notifications"
+              style={{ 
+                color: isActive('/notifications') ? '#007bff' : '#000', 
+                textDecoration: 'none',
+                fontWeight: isActive('/notifications') ? 'bold' : 'normal',
+                display: 'flex',
+                alignItems: 'center',
+              }}
+            >
+              Notifications
+              {unreadCount > 0 && (
+                <span 
+                  style={{
+                    marginLeft: '6px',
+                    backgroundColor: '#dc3545',
+                    color: '#fff',
+                    borderRadius: '50%',
+                    padding: '2px 6px',
+                    fontSize: '12px',
+                    fontWeight: 'bold',
+                  }}
+                >
+                  {unreadCount}
+                </span>
+              )}
             </Link>
           </li>
         </ul>

@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { applicationService } from '../services/applicationService';
 import ApplicationCard from '../components/ApplicationCard';
 import JobApplicationForm from '../components/JobApplicationForm';
+import MeetingMinutesForm from '../components/MeetingMinutesForm';
+import SankeyDiagram from '../components/SankeyDiagram';
+import { processApplicationsForSankey } from '../utils/sankeyDataProcessor';
 
 const JobApplications = () => {
   const [applications, setApplications] = useState([]);
@@ -9,6 +12,9 @@ const JobApplications = () => {
   const [editingApplication, setEditingApplication] = useState(null);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('all');
+  const [selectedApplicationForTracking, setSelectedApplicationForTracking] = useState(null);
+  const [selectedApplicationForMeetingMinutes, setSelectedApplicationForMeetingMinutes] = useState(null);
+
 
   useEffect(() => {
     fetchApplications();
@@ -67,6 +73,27 @@ const JobApplications = () => {
     setEditingApplication(null);
   };
 
+  const handleTrackApplication = (application) => {
+    setSelectedApplicationForTracking(application);
+    setShowForm(false);
+    setEditingApplication(null);
+  };
+
+  const handleAddMeetingMinutes = (application) => {
+    setSelectedApplicationForMeetingMinutes(application);
+    setShowForm(false);
+    setEditingApplication(null);
+  };
+
+  const handleCloseMeetingMinutes = () => {
+    setSelectedApplicationForMeetingMinutes(null);
+  };
+
+  const handleMeetingMinutesSuccess = () => {
+    fetchApplications(); // Refresh the applications list
+  };
+  
+
   const filteredApplications = applications.filter(app => 
     statusFilter === 'all' || app.status === statusFilter
   );
@@ -115,7 +142,7 @@ const JobApplications = () => {
         <div className="mb-4">
           <JobApplicationForm
             onSubmit={editingApplication ? handleEditApplication : handleAddApplication}
-            initialData={editingApplication}
+            initialData={editingApplication || {}}
           />
           <button onClick={handleCancel} className="btn btn-secondary">
             Cancel
@@ -132,6 +159,8 @@ const JobApplications = () => {
               application={application}
               onEdit={handleEdit}
               onDelete={handleDeleteApplication}
+              onTrack={handleTrackApplication}
+              onAddMeetingMinutes={handleAddMeetingMinutes}
             />
           ))}
         </div>
@@ -153,6 +182,32 @@ const JobApplications = () => {
             </button>
           )}
         </div>
+      )}
+
+      {/* Sankey Diagram Section */}
+      {filteredApplications.length > 0 && (
+        <div style={{ marginTop: '40px' }}>
+          <div className="card">
+            <div style={{ padding: '20px' }}>
+              <h3 style={{ marginBottom: '20px', textAlign: 'center' }}>
+                Application Flow Visualization
+              </h3>
+              <SankeyDiagram 
+                data={processApplicationsForSankey(filteredApplications)} 
+                height={400}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Meeting Minutes Form Modal */}
+      {selectedApplicationForMeetingMinutes && (
+        <MeetingMinutesForm
+          application={selectedApplicationForMeetingMinutes}
+          onClose={handleCloseMeetingMinutes}
+          onSuccess={handleMeetingMinutesSuccess}
+        />
       )}
     </div>
   );
