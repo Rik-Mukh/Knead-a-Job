@@ -22,6 +22,7 @@ class JobApplicationViewSet(viewsets.ModelViewSet):
     
     serializer_class = JobApplicationSerializer
     permission_classes = [permissions.AllowAny]  # Allow unauthenticated access for development
+    pagination_class = None
     
     def get_queryset(self):
         """
@@ -30,8 +31,10 @@ class JobApplicationViewSet(viewsets.ModelViewSet):
         Returns:
             QuerySet: Filtered queryset of job applications
         """
-        return JobApplication.objects.filter(user=self.request.user)
-    
+        # TODO: Change this to return only the applications for the current user
+        # return JobApplication.objects.filter(user=self.request.user)
+        return JobApplication.objects.all()
+
     @action(detail=False, methods=['get'])
     def stats(self, request):
         """
