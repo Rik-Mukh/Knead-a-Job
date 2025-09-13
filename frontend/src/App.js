@@ -15,6 +15,7 @@ import ResumeManager from './pages/ResumeManager';
 import NotificationsPage from './pages/NotificationsPage'; 
 import ResponsesPage from './pages/ResponsesPage'; 
 import Login from './pages/Login';
+import ResumeTemplate from './pages/ResumeTemplate';
 
 /**
  * App Component
@@ -43,8 +44,8 @@ function App() {
               {/* Job applications route - manage job applications */}
               <Route path="/applications" element={<JobApplications />} />
               
-              {/* Resume manager route - manage resume files */}
-              <Route path="/resumes" element={<ResumeManager />} />
+              {/* Resume template route - manage structured resume data */}
+              <Route path="/resume-template" element={<ResumeTemplate />} />
               
               {/* Notifications route */}
               <Route path="/notifications" element={<NotificationsPage />} />
