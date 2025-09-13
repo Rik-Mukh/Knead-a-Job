@@ -96,15 +96,23 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        console.log("DEBUG: Starting to fetch dashboard data");
         setLoading(true);
+        
         const applications = await applicationService.getAll();
+        console.log("DEBUG: Fetched applications", applications.length);
         setRecentApplications(applications);
 
-        const resume = await resumeService.getDefault();
-        setDefaultResume(resume);
+        try {
+          const resume = await resumeService.getDefault();
+          console.log("DEBUG: Fetched resume", resume);
+          setDefaultResume(resume);
+        } catch (resumeError) {
+          console.log("DEBUG: Resume fetch failed (this is okay)", resumeError);
+          setDefaultResume(null);
+        }
 
-        // Update stats
-        updateStats(applications);
+        await updateStats();
       } catch (err) {
         console.error("Failed to fetch dashboard data", err);
       } finally {
@@ -114,13 +122,29 @@ const Dashboard = () => {
     fetchData();
   }, []);
 
-  const updateStats = (applications) => {
-    setStats({
-      applied: applications.length,
-      interviews: applications.filter((app) => app.status === "interview").length,
-      rejected: applications.filter((app) => app.status === "rejected").length,
-      offers: applications.filter((app) => app.status === "offer").length,
-    });
+  const updateStats = async () => {
+    try {
+      const statsData = await applicationService.getStats();
+      
+      const newStats = {
+        applied: statsData.applied,
+        interviews: statsData.interview,
+        rejected: statsData.rejected,
+        offers: statsData.accepted, // Backend uses 'accepted' for offers
+      };
+      setStats(newStats);
+    } catch (error) {
+      console.error("Failed to fetch stats", error);
+      // Fallback to calculating from applications if stats endpoint fails
+      const applications = await applicationService.getAll();
+      const fallbackStats = {
+        applied: applications.length,
+        interviews: applications.filter((app) => app.status === "interview").length,
+        rejected: applications.filter((app) => app.status === "rejected").length,
+        offers: applications.filter((app) => app.status === "accepted").length,
+      };
+      setStats(fallbackStats);
+    }
   };
 
   if (loading) {
