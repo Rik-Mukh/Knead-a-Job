@@ -19,7 +19,7 @@ router = DefaultRouter()
 # This automatically creates URL patterns for CRUD operations
 router.register(r'applications', JobApplicationViewSet, basename='application')
 router.register(r'resumes', ResumeViewSet, basename='resume')
-router.register(r'resume-templates', ResumeTemplateViewSet, basename='resume-template')
+router.register(r'resume-template', ResumeTemplateViewSet, basename='resume-template')
 router.register(r'experiences', ExperienceViewSet, basename='experience')
 router.register(r'projects', ProjectViewSet, basename='project')
 router.register(r'educations', EducationViewSet, basename='education')

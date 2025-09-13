@@ -73,6 +73,70 @@ class JobApplicationViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
+class ResumeViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet for Resume model.
+    
+    Provides CRUD operations for file-based resumes.
+    Users can only access their own resumes.
+    """
+    
+    serializer_class = ResumeSerializer
+    permission_classes = [permissions.AllowAny]  # Allow unauthenticated access for development
+    
+    def get_queryset(self):
+        """
+        Return only resumes belonging to the current user.
+        
+        Returns:
+            QuerySet: Filtered queryset of resumes
+        """
+        return Resume.objects.filter(user=self.request.user)
+    
+    @action(detail=True, methods=['post'])
+    def set_default(self, request, pk=None):
+        """
+        Custom action to set a resume as the default for the current user.
+        
+        Args:
+            pk: Primary key of the resume to set as default
+            
+        Returns:
+            Response: JSON response confirming the action
+        """
+        resume = self.get_object()
+        # Unset all other default resumes for this user
+        Resume.objects.filter(user=request.user, is_default=True).exclude(id=resume.id).update(is_default=False)
+        # Set this resume as default
+        resume.is_default = True
+        resume.save()
+        return Response({'status': 'Resume set as default'})
+    
+    @action(detail=False, methods=['get'])
+    def default(self, request):
+        """
+        Custom action to get the default resume for the current user.
+        
+        Returns:
+            Response: JSON response with default resume data or 404 if none exists
+        """
+        try:
+            default_resume = Resume.objects.filter(user=request.user, is_default=True).first()
+            if default_resume:
+                serializer = self.get_serializer(default_resume)
+                return Response(serializer.data)
+            else:
+                return Response(
+                    {'detail': 'No default resume found'}, 
+                    status=status.HTTP_404_NOT_FOUND
+                )
+        except Resume.DoesNotExist:
+            return Response(
+                {'detail': 'No default resume found'}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+
 
 class ResumeTemplateViewSet(viewsets.ModelViewSet):
     """
@@ -120,7 +184,7 @@ class ResumeTemplateViewSet(viewsets.ModelViewSet):
     
     def list(self, request, *args, **kwargs):
         """
-        Override list to return the user's single resume template.
+        Get the current user's resume template.
         Since each user can only have one template, this acts like a 'get my template' endpoint.
         
         Returns:
@@ -129,7 +193,44 @@ class ResumeTemplateViewSet(viewsets.ModelViewSet):
         try:
             template = ResumeTemplate.objects.get(user=request.user)
             serializer = self.get_serializer(template)
-            return Response([serializer.data])  # Return as list for consistency
+            return Response(serializer.data)  # Return single object, not array
+        except ResumeTemplate.DoesNotExist:
+            return Response(
+                {'detail': 'No resume template found'}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
+    
+    def retrieve(self, request, *args, **kwargs):
+        """
+        Override retrieve to redirect to the user's template.
+        Since users can only have one template, this redirects to list behavior.
+        """
+        return self.list(request, *args, **kwargs)
+    
+    def update(self, request, *args, **kwargs):
+        """
+        Update the current user's resume template.
+        Since users can only have one template, this updates their single template.
+        """
+        try:
+            template = ResumeTemplate.objects.get(user=request.user)
+            kwargs['pk'] = template.id
+            return super().update(request, *args, **kwargs)
+        except ResumeTemplate.DoesNotExist:
+            return Response(
+                {'detail': 'No resume template found'}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
+    
+    def destroy(self, request, *args, **kwargs):
+        """
+        Delete the current user's resume template.
+        Since users can only have one template, this deletes their single template.
+        """
+        try:
+            template = ResumeTemplate.objects.get(user=request.user)
+            kwargs['pk'] = template.id
+            return super().destroy(request, *args, **kwargs)
         except ResumeTemplate.DoesNotExist:
             return Response(
                 {'detail': 'No resume template found'}, 
