@@ -18,7 +18,7 @@ const STATUS_MAP = {
 
 // Statistic cards mapping
 const STATCARD_MAP = {
-  applied: { label: "Job", color: "#EFEFEF" },
+  total: { label: "Job", color: "#EFEFEF" },
   interview: { label: "Interview", color: "#C8F1FF" },
   rejected: { label: "Rejection", color: "#FFCDCD" },
   offer: { label: "Offer", color: "#E1FFCD" },
@@ -87,7 +87,7 @@ const Dashboard = () => {
   const [recentApplications, setRecentApplications] = useState([]);
   const [defaultResume, setDefaultResume] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState({ applied: 0, interviews: 0, rejected: 0, offers: 0 });
+  const [stats, setStats] = useState({ total: 0, interviews: 0, rejected: 0, offers: 0 });
   const [selectedApp, setSelectedApp] = useState(null);
 
   useEffect(() => {
@@ -125,7 +125,7 @@ const Dashboard = () => {
       const statsData = await applicationService.getStats();
       
       const newStats = {
-        applied: statsData.applied,
+        total: statsData.total, // Use total count instead of applied
         interviews: statsData.interview,
         rejected: statsData.rejected,
         offers: statsData.accepted, // Backend uses 'accepted' for offers
@@ -136,7 +136,7 @@ const Dashboard = () => {
       // Fallback to calculating from applications if stats endpoint fails
       const applications = await applicationService.getAll();
       const fallbackStats = {
-        applied: applications.length,
+        total: applications.length, // Use total count instead of applied
         interviews: applications.filter((app) => app.status === "interview").length,
         rejected: applications.filter((app) => app.status === "rejected").length,
         offers: applications.filter((app) => app.status === "accepted").length,
@@ -165,7 +165,7 @@ const Dashboard = () => {
       {/* Hero */}
       <div className="dashboard-hero">
         <div className="hero-date">{formatDate(new Date())}</div>
-        <h1 className="hero-title">So far, you’ve applied to...</h1>
+        <h1 className="hero-title">So far, you've tracked...</h1>
       </div>
 
       {/* Statistics */}
@@ -181,7 +181,7 @@ const Dashboard = () => {
           gap: "16px"
         }}
       >
-        <StatisticCard type="applied" count={stats.applied} />
+        <StatisticCard type="total" count={stats.total} />
         <StatisticCard type="interview" count={stats.interviews} />
         <StatisticCard type="rejected" count={stats.rejected} />
         <StatisticCard type="offer" count={stats.offers} />
