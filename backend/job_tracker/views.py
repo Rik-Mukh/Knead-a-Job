@@ -8,9 +8,9 @@ Views handle HTTP requests and return appropriate responses for job applications
 from rest_framework import viewsets, permissions, status, views
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.response import Response
-from .models import JobApplication, Resume, ResumeTemplate, Experience, Project, Education
+from .models import JobApplication, ResumeTemplate, Experience, Project, Education
 from .serializers import (
-    JobApplicationSerializer, ResumeSerializer, ResumeTemplateSerializer, 
+    JobApplicationSerializer, ResumeTemplateSerializer, 
     ResumeTemplateCreateSerializer, ExperienceSerializer, ProjectSerializer, EducationSerializer
 )
 
@@ -33,7 +33,9 @@ class JobApplicationViewSet(viewsets.ModelViewSet):
         Returns:
             QuerySet: Filtered queryset of job applications
         """
-        return JobApplication.objects.filter(user=self.request.user)
+        if self.request.user.is_authenticated:
+            return JobApplication.objects.filter(user=self.request.user)
+        return JobApplication.objects.none()
     
     @action(detail=False, methods=['get'])
     def stats(self, request):
@@ -73,70 +75,6 @@ class JobApplicationViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
-class ResumeViewSet(viewsets.ModelViewSet):
-    """
-    ViewSet for Resume model.
-    
-    Provides CRUD operations for file-based resumes.
-    Users can only access their own resumes.
-    """
-    
-    serializer_class = ResumeSerializer
-    permission_classes = [permissions.AllowAny]  # Allow unauthenticated access for development
-    
-    def get_queryset(self):
-        """
-        Return only resumes belonging to the current user.
-        
-        Returns:
-            QuerySet: Filtered queryset of resumes
-        """
-        return Resume.objects.filter(user=self.request.user)
-    
-    @action(detail=True, methods=['post'])
-    def set_default(self, request, pk=None):
-        """
-        Custom action to set a resume as the default for the current user.
-        
-        Args:
-            pk: Primary key of the resume to set as default
-            
-        Returns:
-            Response: JSON response confirming the action
-        """
-        resume = self.get_object()
-        # Unset all other default resumes for this user
-        Resume.objects.filter(user=request.user, is_default=True).exclude(id=resume.id).update(is_default=False)
-        # Set this resume as default
-        resume.is_default = True
-        resume.save()
-        return Response({'status': 'Resume set as default'})
-    
-    @action(detail=False, methods=['get'])
-    def default(self, request):
-        """
-        Custom action to get the default resume for the current user.
-        
-        Returns:
-            Response: JSON response with default resume data or 404 if none exists
-        """
-        try:
-            default_resume = Resume.objects.filter(user=request.user, is_default=True).first()
-            if default_resume:
-                serializer = self.get_serializer(default_resume)
-                return Response(serializer.data)
-            else:
-                return Response(
-                    {'detail': 'No default resume found'}, 
-                    status=status.HTTP_404_NOT_FOUND
-                )
-        except Resume.DoesNotExist:
-            return Response(
-                {'detail': 'No default resume found'}, 
-                status=status.HTTP_404_NOT_FOUND
-            )
-
-
 
 class ResumeTemplateViewSet(viewsets.ModelViewSet):
     """
@@ -148,15 +86,16 @@ class ResumeTemplateViewSet(viewsets.ModelViewSet):
     
     serializer_class = ResumeTemplateSerializer
     permission_classes = [permissions.AllowAny]  # Allow unauthenticated access for development
+    http_method_names = ['get', 'post', 'put', 'patch', 'delete']  # Explicitly allow PUT
     
     def get_queryset(self):
         """
-        Return only resume templates belonging to the current user.
+        Return the singleton resume template.
         
         Returns:
-            QuerySet: Filtered queryset of resume templates
+            QuerySet: QuerySet containing the single template
         """
-        return ResumeTemplate.objects.filter(user=self.request.user)
+        return ResumeTemplate.objects.all()
     
     def get_serializer_class(self):
         """
@@ -171,108 +110,103 @@ class ResumeTemplateViewSet(viewsets.ModelViewSet):
     
     def perform_create(self, serializer):
         """
-        Create a new resume template for the current user.
+        Create or update the singleton resume template.
         
         Args:
             serializer: The serializer instance
         """
-        # Check if user already has a resume template
-        if ResumeTemplate.objects.filter(user=self.request.user).exists():
-            raise serializers.ValidationError("User already has a resume template.")
-        
-        serializer.save(user=self.request.user)
+        serializer.save()
     
     def list(self, request, *args, **kwargs):
         """
-        Get the current user's resume template.
-        Since each user can only have one template, this acts like a 'get my template' endpoint.
+        Get the resume template.
+        Since only one template exists, this returns the single template.
         
         Returns:
             Response: JSON response with resume template data or 404 if none exists
         """
         try:
-            template = ResumeTemplate.objects.get(user=request.user)
-            serializer = self.get_serializer(template)
-            return Response(serializer.data)  # Return single object, not array
-        except ResumeTemplate.DoesNotExist:
+            template = ResumeTemplate.objects.first()
+            if template:
+                serializer = self.get_serializer(template)
+                return Response(serializer.data)  # Return single object, not array
+            else:
+                # Create a new template if none exists
+                template = ResumeTemplate.get_or_create_template()
+                serializer = self.get_serializer(template)
+                return Response(serializer.data)
+        except Exception as e:
             return Response(
-                {'detail': 'No resume template found'}, 
-                status=status.HTTP_404_NOT_FOUND
+                {'detail': f'Error retrieving template: {str(e)}'}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
     
     def retrieve(self, request, *args, **kwargs):
         """
-        Override retrieve to redirect to the user's template.
-        Since users can only have one template, this redirects to list behavior.
+        Get the resume template by ID (always returns the single template).
+        
+        Returns:
+            Response: JSON response with resume template data
         """
         return self.list(request, *args, **kwargs)
     
     def update(self, request, *args, **kwargs):
         """
-        Update the current user's resume template.
-        Since users can only have one template, this updates their single template.
+        Update the resume template.
+        Since it's a singleton, we update the existing template.
+        
+        Returns:
+            Response: JSON response with updated template data
         """
-        try:
-            template = ResumeTemplate.objects.get(user=request.user)
-            kwargs['pk'] = template.id
-            return super().update(request, *args, **kwargs)
-        except ResumeTemplate.DoesNotExist:
-            return Response(
-                {'detail': 'No resume template found'}, 
-                status=status.HTTP_404_NOT_FOUND
+        template = ResumeTemplate.objects.first()
+        if not template:
+            # Create new template if none exists
+            template = ResumeTemplate.objects.create(
+                name=request.data.get('name', ''),
+                city=request.data.get('city', ''),
+                email=request.data.get('email', ''),
+                phone=request.data.get('phone', ''),
+                links=request.data.get('links', ''),
+                summary=request.data.get('summary', ''),
+                skills=request.data.get('skills', '')
             )
+        else:
+            # Update existing template
+            for field in ['name', 'city', 'email', 'phone', 'links', 'summary', 'skills']:
+                if field in request.data:
+                    setattr(template, field, request.data[field])
+            template.save()
+        
+        serializer = self.get_serializer(template)
+        return Response(serializer.data)
     
     def destroy(self, request, *args, **kwargs):
         """
-        Delete the current user's resume template.
-        Since users can only have one template, this deletes their single template.
-        """
-        try:
-            template = ResumeTemplate.objects.get(user=request.user)
-            kwargs['pk'] = template.id
-            return super().destroy(request, *args, **kwargs)
-        except ResumeTemplate.DoesNotExist:
-            return Response(
-                {'detail': 'No resume template found'}, 
-                status=status.HTTP_404_NOT_FOUND
-            )
-
-
-class ExperienceViewSet(viewsets.ModelViewSet):
-    """
-    ViewSet for Experience model.
-    
-    Provides CRUD operations for work experience entries.
-    """
-    
-    serializer_class = ExperienceSerializer
-    permission_classes = [permissions.AllowAny]  # Allow unauthenticated access for development
-    
-    def get_queryset(self):
-        """
-        Return only experiences belonging to the current user's resume template.
+        Delete the resume template.
         
         Returns:
-            QuerySet: Filtered queryset of experiences
+            Response: 204 No Content on successful deletion
         """
-        try:
-            template = ResumeTemplate.objects.get(user=self.request.user)
-            return Experience.objects.filter(resume_template=template)
-        except ResumeTemplate.DoesNotExist:
-            return Experience.objects.none()
-    
+        template = ResumeTemplate.objects.first()
+        if template:
+            template.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(
+            {'detail': 'Resume template not found'}, 
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+class ExperienceViewSet(viewsets.ModelViewSet):
+    serializer_class = ExperienceSerializer
+    permission_classes = [permissions.AllowAny]
+
+    def get_queryset(self):
+        """Return all experiences - no template filtering needed."""
+        return Experience.objects.all()
+
     def perform_create(self, serializer):
-        """
-        Create a new experience entry for the current user's resume template.
-        
-        Args:
-            serializer: The serializer instance
-        """
-        try:
-            template = ResumeTemplate.objects.get(user=self.request.user)
-            serializer.save(resume_template=template)
-        except ResumeTemplate.DoesNotExist:
-            raise serializers.ValidationError("Resume template not found. Please create a resume template first.")
+        """Create a new experience entry - no template linking needed."""
+        serializer.save()
 
 
 class ProjectViewSet(viewsets.ModelViewSet):
@@ -286,30 +220,12 @@ class ProjectViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.AllowAny]  # Allow unauthenticated access for development
     
     def get_queryset(self):
-        """
-        Return only projects belonging to the current user's resume template.
-        
-        Returns:
-            QuerySet: Filtered queryset of projects
-        """
-        try:
-            template = ResumeTemplate.objects.get(user=self.request.user)
-            return Project.objects.filter(resume_template=template)
-        except ResumeTemplate.DoesNotExist:
-            return Project.objects.none()
+        """Return all projects - no template filtering needed."""
+        return Project.objects.all()
     
     def perform_create(self, serializer):
-        """
-        Create a new project entry for the current user's resume template.
-        
-        Args:
-            serializer: The serializer instance
-        """
-        try:
-            template = ResumeTemplate.objects.get(user=self.request.user)
-            serializer.save(resume_template=template)
-        except ResumeTemplate.DoesNotExist:
-            raise serializers.ValidationError("Resume template not found. Please create a resume template first.")
+        """Create a new project entry - no template linking needed."""
+        serializer.save()
 
 
 class EducationViewSet(viewsets.ModelViewSet):
@@ -323,30 +239,12 @@ class EducationViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.AllowAny]  # Allow unauthenticated access for development
     
     def get_queryset(self):
-        """
-        Return only education entries belonging to the current user's resume template.
-        
-        Returns:
-            QuerySet: Filtered queryset of education entries
-        """
-        try:
-            template = ResumeTemplate.objects.get(user=self.request.user)
-            return Education.objects.filter(resume_template=template)
-        except ResumeTemplate.DoesNotExist:
-            return Education.objects.none()
+        """Return all education entries - no template filtering needed."""
+        return Education.objects.all()
     
     def perform_create(self, serializer):
-        """
-        Create a new education entry for the current user's resume template.
-        
-        Args:
-            serializer: The serializer instance
-        """
-        try:
-            template = ResumeTemplate.objects.get(user=self.request.user)
-            serializer.save(resume_template=template)
-        except ResumeTemplate.DoesNotExist:
-            raise serializers.ValidationError("Resume template not found. Please create a resume template first.")
+        """Create a new education entry - no template linking needed."""
+        serializer.save()
 
 
 class IsAuthenticated(permissions.IsAuthenticated):

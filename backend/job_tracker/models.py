@@ -69,17 +69,11 @@ class JobApplication(models.Model):
 
 class ResumeTemplate(models.Model):
     """
-    Model representing a user's resume template.
+    Model representing a resume template.
     
-    Each user can have only one resume template that contains their personal
-    information and serves as the base for generating resumes.
+    Only one template can exist in the system (singleton pattern).
+    Contains personal information and serves as the base for generating resumes.
     """
-    
-    user = models.OneToOneField(
-        User, 
-        on_delete=models.CASCADE, 
-        help_text="User who owns this resume template"
-    )
     
     # Personal Information
     name = models.CharField(max_length=200, help_text="Full name")
@@ -113,22 +107,54 @@ class ResumeTemplate(models.Model):
     
     def __str__(self):
         """String representation of the resume template."""
-        return f"Resume Template for {self.name}"
+        return f"Resume Template - {self.name or 'Untitled'}"
+    
+    def save(self, *args, **kwargs):
+        """
+        Override save to ensure only one template exists.
+        If a template already exists, update it instead of creating a new one.
+        """
+        if not self.pk and ResumeTemplate.objects.exists():
+            # If this is a new template and one already exists, update the existing one
+            existing = ResumeTemplate.objects.first()
+            existing.name = self.name
+            existing.city = self.city
+            existing.email = self.email
+            existing.phone = self.phone
+            existing.links = self.links
+            existing.summary = self.summary
+            existing.skills = self.skills
+            existing.save()
+            return existing
+        return super().save(*args, **kwargs)
+    
+    @classmethod
+    def get_or_create_template(cls):
+        """
+        Get the existing template or create a new one if none exists.
+        Returns the single template instance.
+        """
+        template, created = cls.objects.get_or_create(
+            pk=1,  # Use a fixed primary key to ensure singleton
+            defaults={
+                'name': '',
+                'city': '',
+                'email': '',
+                'phone': '',
+                'links': '',
+                'summary': '',
+                'skills': ''
+            }
+        )
+        return template
 
 
 class Experience(models.Model):
     """
     Model representing work experience entries.
     
-    Users can have multiple experience entries linked to their resume template.
+    Experience entries are stored independently without template association.
     """
-    
-    resume_template = models.ForeignKey(
-        ResumeTemplate, 
-        on_delete=models.CASCADE, 
-        related_name='experiences',
-        help_text="Resume template this experience belongs to"
-    )
     
     # Experience details
     company = models.CharField(max_length=200, help_text="Company name")
@@ -148,7 +174,7 @@ class Experience(models.Model):
     
     class Meta:
         ordering = ['-order', '-start_date']
-        unique_together = ['resume_template', 'company', 'position', 'start_date']
+        unique_together = ['company', 'position', 'start_date']
     
     def __str__(self):
         """String representation of the experience."""
@@ -159,15 +185,8 @@ class Project(models.Model):
     """
     Model representing project entries.
     
-    Users can have multiple project entries linked to their resume template.
+    Project entries are stored independently without template association.
     """
-    
-    resume_template = models.ForeignKey(
-        ResumeTemplate, 
-        on_delete=models.CASCADE, 
-        related_name='projects',
-        help_text="Resume template this project belongs to"
-    )
     
     # Project details
     name = models.CharField(max_length=200, help_text="Project name")
@@ -192,7 +211,7 @@ class Project(models.Model):
     
     class Meta:
         ordering = ['-order', '-start_date']
-        unique_together = ['resume_template', 'name', 'start_date']
+        unique_together = ['name', 'start_date']
     
     def __str__(self):
         """String representation of the project."""
@@ -203,15 +222,8 @@ class Education(models.Model):
     """
     Model representing education entries.
     
-    Users can have multiple education entries linked to their resume template.
+    Education entries are stored independently without template association.
     """
-    
-    resume_template = models.ForeignKey(
-        ResumeTemplate, 
-        on_delete=models.CASCADE, 
-        related_name='educations',
-        help_text="Resume template this education belongs to"
-    )
     
     # Education details
     institution = models.CharField(max_length=200, help_text="School or university name")
@@ -243,7 +255,7 @@ class Education(models.Model):
     
     class Meta:
         ordering = ['-order', '-start_date']
-        unique_together = ['resume_template', 'institution', 'degree', 'start_date']
+        unique_together = ['institution', 'degree', 'start_date']
     
     def __str__(self):
         """String representation of the education."""

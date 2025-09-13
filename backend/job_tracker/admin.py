@@ -50,41 +50,6 @@ class JobApplicationAdmin(admin.ModelAdmin):
     )
 
 
-@admin.register(Resume)
-class ResumeAdmin(admin.ModelAdmin):
-    """
-    Admin configuration for Resume model.
-    
-    Defines how resumes are displayed and managed in the admin interface.
-    """
-    
-    # Fields to display in the list view
-    list_display = ['title', 'user', 'is_default', 'created_at']
-    
-    # Fields to filter by in the admin interface
-    list_filter = ['is_default', 'created_at', 'user']
-    
-    # Fields to search by
-    search_fields = ['title', 'user__username']
-    
-    # Enable date-based filtering
-    date_hierarchy = 'created_at'
-    
-    # Make certain fields read-only
-    readonly_fields = ['created_at', 'updated_at']
-    
-    # Group related fields together
-    fieldsets = (
-        ('Resume Information', {
-            'fields': ('user', 'title', 'file', 'is_default')
-        }),
-        ('Timestamps', {
-            'fields': ('created_at', 'updated_at'),
-            'classes': ('collapse',)
-        }),
-    )
-
-
 @admin.register(ResumeTemplate)
 class ResumeTemplateAdmin(admin.ModelAdmin):
     """
@@ -94,13 +59,13 @@ class ResumeTemplateAdmin(admin.ModelAdmin):
     """
     
     # Fields to display in the list view
-    list_display = ['name', 'email', 'city', 'user', 'updated_at']
+    list_display = ['name', 'email', 'city', 'phone', 'updated_at']
     
     # Fields to filter by in the admin interface
-    list_filter = ['created_at', 'updated_at', 'user']
+    list_filter = ['created_at', 'updated_at']
     
     # Fields to search by
-    search_fields = ['name', 'email', 'user__username']
+    search_fields = ['name', 'email', 'city', 'phone']
     
     # Enable date-based filtering
     date_hierarchy = 'updated_at'
@@ -123,29 +88,7 @@ class ResumeTemplateAdmin(admin.ModelAdmin):
     )
 
 
-class ExperienceInline(admin.TabularInline):
-    """Inline admin for Experience model."""
-    model = Experience
-    extra = 1
-    fields = ['company', 'position', 'start_date', 'end_date', 'is_current', 'order']
-
-
-class ProjectInline(admin.TabularInline):
-    """Inline admin for Project model."""
-    model = Project
-    extra = 1
-    fields = ['name', 'technologies', 'start_date', 'end_date', 'is_ongoing', 'order']
-
-
-class EducationInline(admin.TabularInline):
-    """Inline admin for Education model."""
-    model = Education
-    extra = 1
-    fields = ['institution', 'degree', 'field_of_study', 'start_date', 'end_date', 'is_current', 'order']
-
-
-# Update ResumeTemplateAdmin to include inlines
-ResumeTemplateAdmin.inlines = [ExperienceInline, ProjectInline, EducationInline]
+# Inline classes removed - models no longer have foreign key to ResumeTemplate
 
 
 @admin.register(Experience)
@@ -154,15 +97,15 @@ class ExperienceAdmin(admin.ModelAdmin):
     Admin configuration for Experience model.
     """
     
-    list_display = ['position', 'company', 'start_date', 'end_date', 'is_current', 'resume_template']
-    list_filter = ['is_current', 'start_date', 'resume_template__user']
-    search_fields = ['company', 'position', 'resume_template__user__username']
+    list_display = ['position', 'company', 'start_date', 'end_date', 'is_current']
+    list_filter = ['is_current', 'start_date']
+    search_fields = ['company', 'position']
     date_hierarchy = 'start_date'
     readonly_fields = ['created_at', 'updated_at']
     
     fieldsets = (
         ('Experience Details', {
-            'fields': ('resume_template', 'company', 'position', 'location', 'start_date', 'end_date', 'is_current')
+            'fields': ('company', 'position', 'location', 'start_date', 'end_date', 'is_current')
         }),
         ('Description', {
             'fields': ('description',)
@@ -183,15 +126,15 @@ class ProjectAdmin(admin.ModelAdmin):
     Admin configuration for Project model.
     """
     
-    list_display = ['name', 'technologies', 'start_date', 'end_date', 'is_ongoing', 'resume_template']
-    list_filter = ['is_ongoing', 'start_date', 'resume_template__user']
-    search_fields = ['name', 'technologies', 'resume_template__user__username']
+    list_display = ['name', 'technologies', 'start_date', 'end_date', 'is_ongoing']
+    list_filter = ['is_ongoing', 'start_date']
+    search_fields = ['name', 'technologies']
     date_hierarchy = 'start_date'
     readonly_fields = ['created_at', 'updated_at']
     
     fieldsets = (
         ('Project Details', {
-            'fields': ('resume_template', 'name', 'description', 'technologies', 'url', 'start_date', 'end_date', 'is_ongoing')
+            'fields': ('name', 'description', 'technologies', 'url', 'start_date', 'end_date', 'is_ongoing')
         }),
         ('Ordering', {
             'fields': ('order',)
@@ -209,15 +152,15 @@ class EducationAdmin(admin.ModelAdmin):
     Admin configuration for Education model.
     """
     
-    list_display = ['degree', 'institution', 'field_of_study', 'start_date', 'end_date', 'is_current', 'resume_template']
-    list_filter = ['is_current', 'start_date', 'resume_template__user']
-    search_fields = ['institution', 'degree', 'field_of_study', 'resume_template__user__username']
+    list_display = ['degree', 'institution', 'field_of_study', 'start_date', 'end_date', 'is_current']
+    list_filter = ['is_current', 'start_date']
+    search_fields = ['institution', 'degree', 'field_of_study']
     date_hierarchy = 'start_date'
     readonly_fields = ['created_at', 'updated_at']
     
     fieldsets = (
         ('Education Details', {
-            'fields': ('resume_template', 'institution', 'degree', 'field_of_study', 'location', 'start_date', 'end_date', 'is_current')
+            'fields': ('institution', 'degree', 'field_of_study', 'location', 'start_date', 'end_date', 'is_current')
         }),
         ('Academic Information', {
             'fields': ('gpa',)
