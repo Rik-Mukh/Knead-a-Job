@@ -3,10 +3,10 @@ import React from 'react';
 const ApplicationCard = ({ application, onEdit, onDelete, onTrack, onAddMeetingMinutes }) => {
   const getStatusColor = (status) => {
     switch (status) {
-      case 'applied': return '#17a2b8';
-      case 'interview': return '#ffc107';
-      case 'rejected': return '#dc3545';
-      case 'accepted': return '#28a745';
+      case 'applied': return '#EFEFEF';
+      case 'interview': return '#C8F1FF';
+      case 'rejected': return '#FFCDCD';
+      case 'accepted': return '#E1FFCD';
       case 'withdrawn': return '#6c757d';
       default: return '#6c757d';
     }
@@ -17,8 +17,15 @@ const ApplicationCard = ({ application, onEdit, onDelete, onTrack, onAddMeetingM
   };
 
   return (
-    <div className="card">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+    <div className="card"  style={{
+            marginTop: '40px',
+            border: '1.5px solid black',
+            borderRadius: '24px',
+            padding: '24px',
+            backgroundColor: '#fff',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+          }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', }}>
         <div>
           <h4 style={{ margin: '0 0 8px 0' }}>{application.position}</h4>
           <p style={{ margin: '0 0 8px 0', color: '#666' }}>{application.company_name}</p>
@@ -37,6 +44,7 @@ const ApplicationCard = ({ application, onEdit, onDelete, onTrack, onAddMeetingM
               padding: '4px 8px',
               borderRadius: '12px',
               fontSize: '12px',
+              color: '#000000',
               textTransform: 'capitalize'
             }}
           >
