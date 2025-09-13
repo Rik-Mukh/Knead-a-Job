@@ -67,6 +67,14 @@ const Navbar = () => {
                 Resumes
               </Link>
             </li>
+            <li>
+              <Link 
+                to="/resume-template"
+                style={{ color: isActive('/resume-template') ? '#fff' : '#ccc' }}
+              >
+                Resume Template
+              </Link>
+            </li>
           </ul>
         </div>
       </div>
