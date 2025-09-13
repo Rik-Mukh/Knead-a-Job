@@ -140,7 +140,7 @@ const JobApplications = () => {
         <div className="mb-4">
           <JobApplicationForm
             onSubmit={editingApplication ? handleEditApplication : handleAddApplication}
-            initialData={editingApplication}
+            initialData={editingApplication || {}}
           />
           <button onClick={handleCancel} className="btn btn-secondary">
             Cancel
