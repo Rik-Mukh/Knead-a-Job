@@ -3,6 +3,8 @@ import { applicationService } from '../services/applicationService';
 import ApplicationCard from '../components/ApplicationCard';
 import JobApplicationForm from '../components/JobApplicationForm';
 import MeetingMinutesForm from '../components/MeetingMinutesForm';
+import SankeyDiagram from '../components/SankeyDiagram';
+import { processApplicationsForSankey } from '../utils/sankeyDataProcessor';
 
 const JobApplications = () => {
   const [applications, setApplications] = useState([]);
@@ -179,6 +181,23 @@ const JobApplications = () => {
               Add Your First Application
             </button>
           )}
+        </div>
+      )}
+
+      {/* Sankey Diagram Section */}
+      {filteredApplications.length > 0 && (
+        <div style={{ marginTop: '40px' }}>
+          <div className="card">
+            <div style={{ padding: '20px' }}>
+              <h3 style={{ marginBottom: '20px', textAlign: 'center' }}>
+                Application Flow Visualization
+              </h3>
+              <SankeyDiagram 
+                data={processApplicationsForSankey(filteredApplications)} 
+                height={400}
+              />
+            </div>
+          </div>
         </div>
       )}
 

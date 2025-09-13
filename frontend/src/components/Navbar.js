@@ -1,27 +1,38 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
 const Navbar = () => {
   const location = useLocation();
 
+  // Example: unread notifications count
+  const [unreadCount, setUnreadCount] = useState(3); // you can fetch this from backend
+
   const isActive = (path) => location.pathname === path;
 
   return (
-    <nav style={{ backgroundColor: '#ffffff', padding: '10px 20px', height: '100px', paddingTop: '30px' }}>
+    <nav style={{ 
+      backgroundColor: '#ffffff', padding: '16px 48px', height: 'fit-content',}}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         {/* App title/brand */}
-        <Link to="/" style={{ color: '#000', fontWeight: 'bold', textDecoration: 'none', fontSize: '2.5rem' }}>
+        <Link to="/" style={{
+            color: '#040fDA',
+            textDecoration: 'none', 
+            fontFamily: 'bree-serif',
+            fontSize: '2.5rem',
+            letterSpacing: '-0.15rem',
+          }}>
           Knead a Job
         </Link>
 
         {/* Navigation links */}
-        <ul style={{ display: 'flex', listStyle: 'none', margin: 0, padding: 0, gap: '20px' }}>
+        <ul style={{ display: 'flex', listStyle: 'none', margin: 0, padding: 0, gap: '48px', alignItems: 'center' }}>
           <li>
             <Link 
               to="/" 
               style={{ 
                 color: isActive('/') ? '#007bff' : '#000', 
                 textDecoration: 'none',
+                fontFamily: 'helvetica-neue-lt-pro',
                 fontWeight: isActive('/') ? 'bold' : 'normal'
               }}
             >
@@ -34,6 +45,7 @@ const Navbar = () => {
               style={{ 
                 color: isActive('/applications') ? '#007bff' : '#000', 
                 textDecoration: 'none',
+                fontFamily: 'helvetica-neue-lt-pro',
                 fontWeight: isActive('/applications') ? 'bold' : 'normal'
               }}
             >
@@ -46,22 +58,42 @@ const Navbar = () => {
               style={{ 
                 color: isActive('/resumes') ? '#007bff' : '#000', 
                 textDecoration: 'none',
+                fontFamily: 'helvetica-neue-lt-pro',
                 fontWeight: isActive('/resumes') ? 'bold' : 'normal'
               }}
             >
               Resumes
             </Link>
           </li>
-          <li>
+
+          {/* Notifications link */}
+          <li style={{ position: 'relative' }}>
             <Link 
-            to="/responses" activeClassName="active"
+              to="/notifications"
               style={{ 
-                color: isActive('/responses') ? '#007bff' : '#000', 
+                color: isActive('/notifications') ? '#007bff' : '#000', 
                 textDecoration: 'none',
-                fontWeight: isActive('/responses') ? 'bold' : 'normal'
+                fontWeight: isActive('/notifications') ? 'bold' : 'normal',
+                display: 'flex',
+                alignItems: 'center',
               }}
             >
-              Responses
+              Notifications
+              {unreadCount > 0 && (
+                <span 
+                  style={{
+                    marginLeft: '6px',
+                    backgroundColor: '#dc3545',
+                    color: '#fff',
+                    borderRadius: '50%',
+                    padding: '2px 6px',
+                    fontSize: '12px',
+                    fontWeight: 'bold',
+                  }}
+                >
+                  {unreadCount}
+                </span>
+              )}
             </Link>
           </li>
         </ul>
