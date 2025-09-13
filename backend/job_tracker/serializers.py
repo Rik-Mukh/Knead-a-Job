@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import JobApplication, Resume, MeetingNote
+from .models import JobApplication, Resume, MeetingNote, Notification
 from django.contrib.auth.models import User
 
 class MeetingNoteSerializer(serializers.ModelSerializer):
@@ -114,4 +114,41 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'username', 'email', 'first_name', 'last_name', 'date_joined']
-        read_only_fields = ['id', 'date_joined']
+        read_only_fields = ['id', 'date_joined']# -------------------------------
+# Notification Serializer
+# -------------------------------
+
+class NotificationSerializer(serializers.ModelSerializer):
+    """
+    Serializer for Notification model.
+    """
+    should_show = serializers.ReadOnlyField()
+    job_application_title = serializers.CharField(source='job_application.position', read_only=True)
+    job_application_company = serializers.CharField(source='job_application.company_name', read_only=True)
+
+    class Meta:
+        model = Notification
+        fields = [
+            'id', 'user', 'job_application', 'job_application_title', 'job_application_company',
+            'title', 'message', 'show_date', 'is_read', 'is_active',
+            'created_at', 'updated_at', 'should_show'
+        ]
+        read_only_fields = ['id', 'user', 'created_at', 'updated_at', 'should_show']
+
+    def create(self, validated_data):
+        # Automatically assign the user from the request context
+        user = self.context['request'].user
+        if not user.is_authenticated:
+            from django.contrib.auth.models import User
+            user, created = User.objects.get_or_create(
+                username='halalkingxi',
+                defaults={'email': 'rik@ualberta.ca', 'first_name': 'Rik', 'last_name': 'Mukherji'}
+            )
+        validated_data['user'] = user
+        return super().create(validated_data)
+    
+    def to_representation(self, instance):
+        """Override to add debugging information."""
+        data = super().to_representation(instance)
+        print(f"DEBUG: Serializing notification {instance.id}: {data}")
+        return data
