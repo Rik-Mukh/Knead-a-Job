@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
 import Timeline from "../components/Timeline"; 
 import { mockApplications, mockResume } from "./TestData";
+import { applicationService } from "../services/applicationService";
+import { resumeService } from "../services/resumeService";
+
 import "./Dashboard.css";
 
 const STATUS_MAP = {
@@ -89,10 +92,26 @@ const Dashboard = () => {
 
 
   useEffect(() => {
-    // ✅ Using mock data instead of API
-    setRecentApplications(mockApplications);
-    setDefaultResume(mockResume);
-    setLoading(false);
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+  
+        // Fetch applications from backend
+        const applications = await applicationService.getAll();
+        setRecentApplications(applications);
+  
+        // Fetch default resume
+        const resume = await resumeService.getDefault();
+        setDefaultResume(resume);
+  
+      } catch (err) {
+        console.error("Failed to fetch dashboard data", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+  
+    fetchData();
   }, []);
 
 
