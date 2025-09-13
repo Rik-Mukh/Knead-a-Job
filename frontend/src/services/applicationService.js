@@ -68,6 +68,18 @@ export const applicationService = {
   },
 
   /**
+   * Update the stage of a job application
+   * 
+   * @param {number} id - The ID of the job application to update
+   * @param {Object} data - Updated job application data
+   * @returns {Promise<Object>} Updated job application object
+   */
+  async updateStage(id, data) {
+    const response = await axios.put(`${API_BASE_URL}${id}/stage/`, data);
+    return response.data;
+  },
+
+  /**
    * Delete a job application
    * 
    * @param {number} id - The ID of the job application to delete
