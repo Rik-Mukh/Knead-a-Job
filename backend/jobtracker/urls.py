@@ -18,4 +18,7 @@ urlpatterns = [
     # API endpoints for job tracker
     path('api/', include('job_tracker.urls')),
     
+    # GOOGLE 
+    path('accounts/', include('allauth.urls')),
+    path('', include('googlelogin.urls')),
 ]

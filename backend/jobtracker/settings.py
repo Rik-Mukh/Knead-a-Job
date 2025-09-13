@@ -28,9 +28,42 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',      # Django REST Framework for API
     'corsheaders',         # CORS headers for React frontend
-    'job_tracker',         # Main job tracker application
+    'job_tracker',         # Main job tracker application,
+    'googlelogin', #beginning of google login apps
+    'django.contrib.sites',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
 ]
 
+# Social account providers configuration
+# SOCIALACCOUNT_PROVIDERS = {
+#     'google': {
+#         'SCOPE': [
+#             'profile',
+#             'email',
+#         ],
+#         'AUTH_PARAMS': {
+#             'access_type': 'online',
+#         }
+#     }
+# }
+
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'SCOPE': [
+            'profile',
+            'email',
+            'https://www.googleapis.com/auth/gmail.readonly',  # Add Gmail read access
+        ],
+        'AUTH_PARAMS': {
+            'access_type': 'offline',  # Get refresh token
+            'prompt': 'consent',       # Force consent screen to get refresh token
+        }
+    }
+}
+   
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',  # CORS middleware (should be first)
     'django.middleware.security.SecurityMiddleware',
@@ -38,6 +71,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'allauth.account.middleware.AccountMiddleware',  # Add this line
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -123,3 +157,16 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 20,
 }
+
+SITE_ID = 2
+
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+)
+
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
+
+SOCIALACCOUNT_LOGIN_ON_GET=True
+SOCIALACCOUNT_STORE_TOKENS = True
