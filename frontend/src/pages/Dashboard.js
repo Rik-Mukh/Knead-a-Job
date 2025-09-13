@@ -14,6 +14,14 @@ const STATUS_MAP = {
   withdrawn: { label: "Withdrawn", color: "#6c757d" },
 };
 
+const STATCARD_MAP = {
+  applied: { label: "Job", color: "#efefef" },
+  interview: { label: "Interview", color: "#c8f1ff" },
+  rejected: { label: "Rejection", color: "#e1ffcd", },
+  offer: { label: "Offer", color: "#ffcdcd" }
+}
+
+
 const StatusBadge = ({ status }) => {
   if (!status) return null;
   const key = status.toLowerCase();
@@ -26,6 +34,37 @@ const StatusBadge = ({ status }) => {
     </span>
   );
 };
+
+const StatisticCard = ({ type, count }) => {
+  const stat = (count !== 1) ? ((STATCARD_MAP[type].label)) + 's' : (STATCARD_MAP[type].label);
+
+  return (
+    <div className = "statCard" style = {{
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "flex-end",
+      justifyContent: "space-between",
+      backgroundColor: STATCARD_MAP[type].color,
+      color: "black",
+      width: "100%",
+      height: "100%",
+      padding: "24px 24px",
+      boxSizing: "border-box",
+      borderRadius: "24px"
+    }}>
+      <div className = "stat" style = {{
+        font: "normal 400 6.25rem helvetica-neue-lt-pro"
+      }}>
+        { count }
+      </div>
+      <div className = "label" style = {{
+        font: "normal 300 2rem helvetica-neue-lt-pro",
+      }}>
+        { stat }
+      </div>
+    </div>
+  )
+}
 
 const formatDate = (dateString) => {
   if (!dateString) return "";
@@ -41,7 +80,16 @@ const Dashboard = () => {
   const [recentApplications, setRecentApplications] = useState([]);
   const [defaultResume, setDefaultResume] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  const [stats, filterApplications] = useState({
+    applied: 0,
+    interviews: 0,
+    rejected: 0,
+    offers: 0
+  })
+
   const [selectedApp, setSelectedApp] = useState(null);
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -66,6 +114,43 @@ const Dashboard = () => {
     fetchData();
   }, []);
 
+
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true);
+
+      // Applications
+      const applicationsData = await applicationService.getAll();
+      const sorted = (applicationsData || []).sort(
+        (a, b) => new Date(b.applied_date) - new Date(a.applied_date)
+      );
+      setRecentApplications(
+        (sorted.length < 5) ? sorted : sorted.slice(0, 5) // should return the most recent 5 applications
+      ); 
+
+      // getting dashboard card data
+      filterApplications(stats => {
+        stats.applied = sorted.length;
+        stats.interviews = sorted.filter((app) => (app.status === "interviews")).length;
+        stats.rejected= sorted.filter((app) => (app.status === "rejected")).length;
+        stats.offers = sorted.filter((app) => (app.status === "offers")).length;
+      })
+
+
+      // Default resume
+      try {
+        const resumeData = await resumeService.getDefault();
+        setDefaultResume(resumeData);
+      } catch {
+        setDefaultResume(null);
+      }
+    } catch (err) {
+      console.error("Error fetching dashboard data:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="dashboard-wrap">
@@ -82,6 +167,22 @@ const Dashboard = () => {
         <div className="hero-date">{formatDate(new Date())}</div>
         <h1 className="hero-title">So far, you’ve applied to...</h1>
       </div>
+      <section className="stat-wrapper" style={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        width: "100%",
+        height: "16.75rem",
+        padding: "10px 10px",
+        boxSizing: "border-box",
+        gap: "16px"
+      }}>
+        <StatisticCard type="applied" count={ stats.applied }/>
+        <StatisticCard type="interview" count={ stats.interviews }/>
+        <StatisticCard type="rejected" count={ stats.rejected }/>
+        <StatisticCard type="offer" count={ stats.offers }/>
+      </section>
+
 
       {/* Applications Table */}
       <div className="table-card">
