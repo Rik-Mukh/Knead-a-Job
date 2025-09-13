@@ -43,6 +43,9 @@ class JobApplication(models.Model):
     
     # Additional information
     notes = models.TextField(blank=True, null=True, help_text="Additional notes about the application")
+    # Follow-up response tracking
+    meeting_minutes = models.TextField(blank=True, null=True, help_text="Meeting notes or interview minutes related to this job")
+
     salary_range = models.CharField(max_length=100, blank=True, null=True, help_text="Salary range if available")
     location = models.CharField(max_length=200, blank=True, null=True, help_text="Job location")
     
@@ -134,8 +137,8 @@ class ResumeTemplate(models.Model):
             existing.save()
             return existing
         return super().save(*args, **kwargs)
-    
-    @classmethod
+      
+          @classmethod
     def get_or_create_template(cls):
         """
         Get the existing template or create a new one if none exists.
@@ -154,6 +157,74 @@ class ResumeTemplate(models.Model):
             }
         )
         return template
+    
+
+
+
+class MeetingNote(models.Model):
+    """
+    Model representing a meeting note.
+    
+    This model stores information about meeting notes related to a job application.
+    """
+    job_application = models.ForeignKey(JobApplication, on_delete=models.CASCADE, help_text="Job application related to this meeting note")
+    content = models.TextField(help_text="Content of the meeting note")
+
+    # Timestamps
+    created_at = models.DateTimeField(auto_now_add=True, help_text="When this meeting note was created")
+    updated_at = models.DateTimeField(auto_now=True, help_text="When this meeting note was last updated")
+    
+    class Meta:
+        # Order meeting notes by creation date (most recent first)
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        """String representation of the meeting note."""
+        return f"Meeting Note for {self.job_application.position} at {self.job_application.company_name}"
+
+
+class Notification(models.Model):
+    """
+    Model representing a notification.
+    
+    This model stores information about notifications sent to users,
+    with a single show_date field that determines when to display the notification.
+    """
+    
+    # Core notification fields
+    user = models.ForeignKey(User, on_delete=models.CASCADE, help_text="User who receives this notification")
+    job_application = models.ForeignKey(JobApplication, on_delete=models.CASCADE, help_text="Job application related to this notification")
+    title = models.CharField(max_length=200, help_text="Notification title")
+    message = models.TextField(help_text="Notification message content")
+    
+    # When to show this notification
+    show_date = models.DateTimeField(help_text="When to show this notification")
+    
+    # Status tracking
+    is_read = models.BooleanField(default=False, help_text="Whether the user has read this notification")
+    is_active = models.BooleanField(default=True, help_text="Whether this notification is still active")
+    
+    # Timestamps
+    created_at = models.DateTimeField(auto_now_add=True, help_text="When this notification was created")
+    updated_at = models.DateTimeField(auto_now=True, help_text="When this notification was last updated")
+    
+    class Meta:
+        # Order notifications by creation date (most recent first)
+        ordering = ['-created_at']
+        # Ensure user cannot have duplicate notifications for same job application and title
+        unique_together = ['user', 'job_application', 'title']
+    
+    def __str__(self):
+        """String representation of the notification."""
+        return f"{self.title} - {self.job_application.position} at {self.job_application.company_name}"
+    
+    @property
+    def should_show(self):
+        """Check if notification should be shown based on current time and show_date."""
+        from django.utils import timezone
+        return (self.is_active and 
+               not self.is_read and 
+               timezone.now() >= self.show_date)
 
 
 class Experience(models.Model):
@@ -267,6 +338,4 @@ class Education(models.Model):
     def __str__(self):
         """String representation of the education."""
         return f"{self.degree} from {self.institution}"
-
-
 

@@ -7,10 +7,13 @@
 
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { NotificationProvider } from './contexts/NotificationContext';
 import Navbar from './components/Navbar';
 import Dashboard from './pages/Dashboard';
 import JobApplications from './pages/JobApplications';
 import ResumeManager from './pages/ResumeManager';
+import NotificationsPage from './pages/NotificationsPage'; 
+import ResponsesPage from './pages/ResponsesPage'; 
 import ResumeTemplate from './pages/ResumeTemplate';
 
 /**
@@ -23,29 +26,33 @@ import ResumeTemplate from './pages/ResumeTemplate';
  */
 function App() {
   return (
-    <Router>
-      <div className="App">
-        {/* Navigation bar component */}
-        <Navbar />
-        
-        {/* Main content container */}
-        <div className="container">
-          <Routes>
-            {/* Dashboard route - shows overview and statistics */}
-            <Route path="/" element={<Dashboard />} />
-            
-            {/* Job applications route - manage job applications */}
-            <Route path="/applications" element={<JobApplications />} />
-            
-            {/* Resume manager route - manage resume files */}
-            <Route path="/resumes" element={<ResumeManager />} />
-            
-            {/* Resume template route - manage structured resume data */}
-            <Route path="/resume-template" element={<ResumeTemplate />} />
-          </Routes>
+    <NotificationProvider>
+      <Router>
+        <div className="App">
+          {/* Navigation bar component */}
+          <Navbar />
+          
+          {/* Main content container */}
+          <div className="container">
+            <Routes>
+              {/* Dashboard route - shows overview and statistics */}
+              <Route path="/" element={<Dashboard />} />
+              
+              {/* Job applications route - manage job applications */}
+              <Route path="/applications" element={<JobApplications />} />
+              
+              {/* Resume template route - manage structured resume data */}
+              <Route path="/resume-template" element={<ResumeTemplate />} />
+              
+              {/* Notifications route */}
+              <Route path="/notifications" element={<NotificationsPage />} />
+              
+              <Route path="/responses" element={<ResponsesPage />} />
+            </Routes>
+          </div>
         </div>
-      </div>
-    </Router>
+      </Router>
+    </NotificationProvider>
   );
 }
 

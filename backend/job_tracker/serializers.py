@@ -1,53 +1,78 @@
-"""
-Job Tracker Serializers
-
-This module contains Django REST Framework serializers for the job tracker models.
-Serializers handle the conversion between model instances and JSON data for API responses.
-"""
-
 from rest_framework import serializers
-from .models import JobApplication, ResumeTemplate, Experience, Project, Education
+
+from django.contrib.auth.models import User
+from .models import JobApplication, ResumeTemplate, Experience, Project, Education, MeetingNote, Notification
 
 
-class JobApplicationSerializer(serializers.ModelSerializer):
+class MeetingNoteSerializer(serializers.ModelSerializer):
     """
-    Serializer for JobApplication model.
-    
-    Handles serialization and deserialization of job application data.
-    Automatically sets the user field from the request context.
+    Serializer for MeetingNote model.
     """
-    
+
+    class Meta:
+        model = MeetingNote
+        fields = ['id', 'job_application', 'content', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+    def create(self, validated_data):
+        print(f"DEBUG: MeetingNoteSerializer.create called with: {validated_data}")
+        return super().create(validated_data)
+
+    def validate_content(self, value):
+        if not value or not value.strip():
+            raise serializers.ValidationError("Meeting note content cannot be empty.")
+        return value.strip()
+
+
+# -------------------------------
+# Job Application Serializers
+# -------------------------------
+
+class JobApplicationListSerializer(serializers.ModelSerializer):
+    # Reverse relation without related_name – use default meetingnote_set
+    meetingnote_set = MeetingNoteSerializer(many=True, read_only=True)
+
     class Meta:
         model = JobApplication
-        fields = '__all__'  # Include all model fields
-        read_only_fields = ('user', 'created_at', 'updated_at')  # Fields that cannot be modified via API
-    
+        exclude = ['meeting_minutes']  # assuming this is a field you added
+        read_only_fields = ('user', 'created_at', 'updated_at')
+
     def create(self, validated_data):
-        """
-        Override create method to automatically set the user from the request context.
-        
-        Args:
-            validated_data: The validated data from the serializer
-            
-        Returns:
-            JobApplication: The created job application instance
-        """
-        # Set the user from the request context
+        # Automatically assign the user from the request context
+        # For development, create a default user if none exists
+        user = self.context['request'].user
+        if not user.is_authenticated:
+            from django.contrib.auth.models import User
+            user, created = User.objects.get_or_create(
+                username='halalkingxi',
+                defaults={'email': 'rik@ualberta.ca', 'first_name': 'Rik', 'last_name': 'Mukherji'}
+            )
+        validated_data['user'] = user
         return super().create(validated_data)
-    
+
+
+class JobApplicationDetailSerializer(serializers.ModelSerializer):
+    meetingnote_set = MeetingNoteSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = JobApplication
+        fields = '__all__'
+        read_only_fields = ('user', 'created_at', 'updated_at')
+
+    def create(self, validated_data):
+        # Automatically assign the user from the request context
+        # For development, create a default user if none exists
+        user = self.context['request'].user
+        if not user.is_authenticated:
+            from django.contrib.auth.models import User
+            user, created = User.objects.get_or_create(
+                username='halalkingxi',
+                defaults={'email': 'rik@ualberta.ca', 'first_name': 'Rik', 'last_name': 'Mukherji'}
+            )
+        validated_data['user'] = user
+        return super().create(validated_data)
+
     def validate_applied_date(self, value):
-        """
-        Validate that the applied date is not in the future.
-        
-        Args:
-            value: The applied date value
-            
-        Returns:
-            date: The validated applied date
-            
-        Raises:
-            serializers.ValidationError: If the date is in the future
-        """
         from django.utils import timezone
         if value > timezone.now().date():
             raise serializers.ValidationError("Applied date cannot be in the future.")
@@ -94,15 +119,66 @@ class ExperienceSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError({
                     "end_date": "End date is required unless this is your current position."
                 })
-
-        # Order check
-        if start and attrs.get("end_date") and attrs["end_date"] < start:
+                
+               if start and attrs.get("end_date") and attrs["end_date"] < start:
             raise serializers.ValidationError({
                 "end_date": "End date cannot be before start date."
             })
         return attrs
 
-    # No resume_template logic needed - experiences are independent
+
+
+
+
+class UserSerializer(serializers.ModelSerializer):
+    """
+    Serializer for User model.
+    
+    Provides basic user information for the frontend.
+    """
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'date_joined']
+        read_only_fields = ['id', 'date_joined']# -------------------------------
+# Notification Serializer
+# -------------------------------
+
+class NotificationSerializer(serializers.ModelSerializer):
+    """
+    Serializer for Notification model.
+    """
+    should_show = serializers.ReadOnlyField()
+    job_application_title = serializers.CharField(source='job_application.position', read_only=True)
+    job_application_company = serializers.CharField(source='job_application.company_name', read_only=True)
+
+    class Meta:
+        model = Notification
+        fields = [
+            'id', 'user', 'job_application', 'job_application_title', 'job_application_company',
+            'title', 'message', 'show_date', 'is_read', 'is_active',
+            'created_at', 'updated_at', 'should_show'
+        ]
+        read_only_fields = ['id', 'user', 'created_at', 'updated_at', 'should_show']
+
+    def create(self, validated_data):
+        # Automatically assign the user from the request context
+        user = self.context['request'].user
+        if not user.is_authenticated:
+            from django.contrib.auth.models import User
+            user, created = User.objects.get_or_create(
+                username='halalkingxi',
+                defaults={'email': 'rik@ualberta.ca', 'first_name': 'Rik', 'last_name': 'Mukherji'}
+            )
+        validated_data['user'] = user
+        return super().create(validated_data)
+    
+    def to_representation(self, instance):
+        """Override to add debugging information."""
+        data = super().to_representation(instance)
+        print(f"DEBUG: Serializing notification {instance.id}: {data}")
+        return data
+
+
 
 class ProjectSerializer(serializers.ModelSerializer):
     """
@@ -191,6 +267,7 @@ class ResumeTemplateCreateSerializer(serializers.ModelSerializer):
             setattr(template, attr, value)
         template.save()
         return template
+
 
 
 

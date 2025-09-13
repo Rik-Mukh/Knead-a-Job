@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { applicationService } from '../services/applicationService';
 import ApplicationCard from '../components/ApplicationCard';
 import JobApplicationForm from '../components/JobApplicationForm';
+import MeetingMinutesForm from '../components/MeetingMinutesForm';
+import SankeyDiagram from '../components/SankeyDiagram';
+import { processApplicationsForSankey } from '../utils/sankeyDataProcessor';
 
 const JobApplications = () => {
   const [applications, setApplications] = useState([]);
@@ -9,6 +12,8 @@ const JobApplications = () => {
   const [editingApplication, setEditingApplication] = useState(null);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('all');
+  const [selectedApplicationForTracking, setSelectedApplicationForTracking] = useState(null);
+  const [selectedApplicationForMeetingMinutes, setSelectedApplicationForMeetingMinutes] = useState(null);
 
   useEffect(() => {
     fetchApplications();
@@ -67,27 +72,45 @@ const JobApplications = () => {
     setEditingApplication(null);
   };
 
-  const filteredApplications = applications.filter(app => 
-    statusFilter === 'all' || app.status === statusFilter
+  const handleTrackApplication = (application) => {
+    setSelectedApplicationForTracking(application);
+    setShowForm(false);
+    setEditingApplication(null);
+  };
+
+  const handleAddMeetingMinutes = (application) => {
+    setSelectedApplicationForMeetingMinutes(application);
+    setShowForm(false);
+    setEditingApplication(null);
+  };
+
+  const handleCloseMeetingMinutes = () => {
+    setSelectedApplicationForMeetingMinutes(null);
+  };
+
+  const handleMeetingMinutesSuccess = () => {
+    fetchApplications(); // Refresh the applications list
+  };
+
+  const filteredApplications = applications.filter(
+    (app) => statusFilter === 'all' || app.status === statusFilter
   );
 
   if (loading) {
     return (
-      <div className="text-center">
-        <h2>Job Applications</h2>
+      <div style={{ textAlign: 'center', padding: '40px' }}>
+        <h1>Job Applications</h1>
         <p>Loading...</p>
       </div>
     );
   }
 
   return (
-    <div>
+    <div style={{ padding: '20px' }}>
+      {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-        <h2>Job Applications</h2>
-        <button 
-          onClick={() => setShowForm(true)}
-          className="btn btn-primary"
-        >
+        <h1>Job Applications</h1>
+        <button onClick={() => setShowForm(true)} className="btn btn-primary">
           Add Application
         </button>
       </div>
@@ -99,7 +122,7 @@ const JobApplications = () => {
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
           className="form-control"
-          style={{ width: '200px', display: 'inline-block', marginLeft: '10px' }}
+          style={{ width: '200px', display: 'inline-block',}}
         >
           <option value="all">All</option>
           <option value="applied">Applied</option>
@@ -115,7 +138,7 @@ const JobApplications = () => {
         <div className="mb-4">
           <JobApplicationForm
             onSubmit={editingApplication ? handleEditApplication : handleAddApplication}
-            initialData={editingApplication}
+            initialData={editingApplication || {}}
           />
           <button onClick={handleCancel} className="btn btn-secondary">
             Cancel
@@ -125,27 +148,37 @@ const JobApplications = () => {
 
       {/* Applications List */}
       {filteredApplications.length > 0 ? (
-        <div className="grid grid-2">
+        <div
+          style={{
+            display: 'grid',
+            gap: '20px',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+          }}
+        >
           {filteredApplications.map((application) => (
-            <ApplicationCard
+            <div
               key={application.id}
-              application={application}
-              onEdit={handleEdit}
-              onDelete={handleDeleteApplication}
-            />
+            >
+              <ApplicationCard
+                application={application}
+                onEdit={handleEdit}
+                onDelete={handleDeleteApplication}
+                onTrack={handleTrackApplication}
+                onAddMeetingMinutes={handleAddMeetingMinutes}
+              />
+            </div>
           ))}
         </div>
       ) : (
-        <div className="card text-center">
+        <div style={{ textAlign: 'center', marginTop: '20px' }}>
           <h3>No Applications Found</h3>
           <p style={{ color: '#666' }}>
-            {statusFilter === 'all' 
+            {statusFilter === 'all'
               ? "You haven't added any job applications yet. Click 'Add Application' to get started!"
-              : `No applications with status '${statusFilter}' found.`
-            }
+              : `No applications with status '${statusFilter}' found.`}
           </p>
           {statusFilter === 'all' && (
-            <button 
+            <button
               onClick={() => setShowForm(true)}
               className="btn btn-primary"
             >
@@ -153,6 +186,37 @@ const JobApplications = () => {
             </button>
           )}
         </div>
+      )}
+
+      {/* Sankey Diagram Section */}
+      {filteredApplications.length > 0 && (
+        <div
+          style={{
+            marginTop: '40px',
+            border: '1.5px solid black',
+            borderRadius: '24px',
+            padding: '24px',
+            backgroundColor: '#fff',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+          }}
+        >
+          <h3 style={{ textAlign: 'center', marginBottom: '20px' }}>
+            The Great Job Hunt Flow
+          </h3>
+          <SankeyDiagram
+            data={processApplicationsForSankey(filteredApplications)}
+            height={400}
+          />
+        </div>
+      )}
+
+      {/* Meeting Minutes Form Modal */}
+      {selectedApplicationForMeetingMinutes && (
+        <MeetingMinutesForm
+          application={selectedApplicationForMeetingMinutes}
+          onClose={handleCloseMeetingMinutes}
+          onSuccess={handleMeetingMinutesSuccess}
+        />
       )}
     </div>
   );
