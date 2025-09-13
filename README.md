@@ -80,11 +80,17 @@ The Django API will be available at `http://localhost:8000`
    ```bash
    npm install
    ```
-
-3. Start the development server:
+   
+3. Install dependencies:
+  ```bash
+   npm install react-confetti
+   ```
+4. Start the development server:
    ```bash
    npm start
    ```
+
+   
 
 The React app will be available at `http://localhost:3000`
 

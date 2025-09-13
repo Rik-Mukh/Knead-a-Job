@@ -18,7 +18,7 @@ const STATUS_MAP = {
 
 // Statistic cards mapping
 const STATCARD_MAP = {
-  applied: { label: "Job", color: "#EFEFEF" },
+  total: { label: "Job", color: "#EFEFEF" },
   interview: { label: "Interview", color: "#C8F1FF" },
   rejected: { label: "Rejection", color: "#FFCDCD" },
   offer: { label: "Offer", color: "#E1FFCD" },
@@ -87,26 +87,30 @@ const Dashboard = () => {
   const [recentApplications, setRecentApplications] = useState([]);
   const [defaultResume, setDefaultResume] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState({ applied: 0, interviews: 0, rejected: 0, offers: 0 });
+  const [stats, setStats] = useState({ total: 0, interviews: 0, rejected: 0, offers: 0 });
   const [selectedApp, setSelectedApp] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
+        console.log("DEBUG: Starting to fetch dashboard data");
         setLoading(true);
+        
         const applications = await applicationService.getAll();
+        console.log("DEBUG: Fetched applications", applications.length);
         setRecentApplications(applications);
 
-        const resume = await resumeService.getDefault();
-        setDefaultResume(resume);
+        try {
+          const resume = await resumeService.getDefault();
+          console.log("DEBUG: Fetched resume", resume);
+          setDefaultResume(resume);
+        } catch (resumeError) {
+          console.log("DEBUG: Resume fetch failed (this is okay)", resumeError);
+          setDefaultResume(null);
+        }
 
-        // Update stats
-        setStats({
-          applied: applications.length,
-          interviews: applications.filter(app => app.status.toLowerCase() === "interview").length,
-          rejected: applications.filter(app => app.status.toLowerCase() === "rejected").length,
-          offers: applications.filter(app => ["offer", "accepted"].includes(app.status.toLowerCase())).length,
-        });
+        await updateStats();
+
       } catch (err) {
         console.error("Failed to fetch dashboard data", err);
       } finally {
@@ -116,7 +120,31 @@ const Dashboard = () => {
     fetchData();
   }, []);
 
-  // Confetti if any "Offer" or "Accepted"
+  const updateStats = async () => {
+    try {
+      const statsData = await applicationService.getStats();
+      
+      const newStats = {
+        total: statsData.total, // Use total count instead of applied
+        interviews: statsData.interview,
+        rejected: statsData.rejected,
+        offers: statsData.accepted, // Backend uses 'accepted' for offers
+      };
+      setStats(newStats);
+    } catch (error) {
+      console.error("Failed to fetch stats", error);
+      // Fallback to calculating from applications if stats endpoint fails
+      const applications = await applicationService.getAll();
+      const fallbackStats = {
+        total: applications.length, // Use total count instead of applied
+        interviews: applications.filter((app) => app.status === "interview").length,
+        rejected: applications.filter((app) => app.status === "rejected").length,
+        offers: applications.filter((app) => app.status === "accepted").length,
+      };
+      setStats(fallbackStats);
+    }
+  };
+  // Define hasOffer, width, height before JSX
   const hasOffer = recentApplications.some(app => ["offer", "accepted"].includes(app.status.toLowerCase()));
   const width = window.innerWidth;
   const height = window.innerHeight;
@@ -137,7 +165,7 @@ const Dashboard = () => {
       {/* Hero */}
       <div className="dashboard-hero">
         <div className="hero-date">{formatDate(new Date())}</div>
-        <h1 className="hero-title">So far, you’ve applied to...</h1>
+        <h1 className="hero-title">So far, you've tracked...</h1>
       </div>
 
       {/* Statistics */}
@@ -153,7 +181,7 @@ const Dashboard = () => {
           gap: "16px"
         }}
       >
-        <StatisticCard type="applied" count={stats.applied} />
+        <StatisticCard type="total" count={stats.total} />
         <StatisticCard type="interview" count={stats.interviews} />
         <StatisticCard type="rejected" count={stats.rejected} />
         <StatisticCard type="offer" count={stats.offers} />
@@ -183,7 +211,6 @@ const Dashboard = () => {
               <tr key={app.id || app.company_name + app.applied_date}>
                 <td>{app.company_name}</td>
                 <td>{app.position}</td>
-                {/* Date Applied opens timeline, no URL style */}
                 <td 
                   style={{ cursor: "default", color: "#000" }}
                   onClick={() => setSelectedApp(app)}

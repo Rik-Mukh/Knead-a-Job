@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { useNotification } from '../contexts/NotificationContext';
 
 const Navbar = () => {
   const location = useLocation();
-
-  // Example: unread notifications count
-  const [unreadCount, setUnreadCount] = useState(3); // you can fetch this from backend
+  const { unreadCount, loading } = useNotification();
 
   const isActive = (path) => location.pathname === path;
 
@@ -79,7 +78,7 @@ const Navbar = () => {
               }}
             >
               Notifications
-              {unreadCount > 0 && (
+              {!loading && unreadCount > 0 && (
                 <span 
                   style={{
                     marginLeft: '6px',
