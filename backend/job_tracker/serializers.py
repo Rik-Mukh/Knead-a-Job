@@ -6,7 +6,7 @@ Serializers handle the conversion between model instances and JSON data for API 
 """
 
 from rest_framework import serializers
-from .models import JobApplication, Resume
+from .models import JobApplication, ResumeTemplate, Experience, Project, Education
 
 
 class JobApplicationSerializer(serializers.ModelSerializer):
@@ -107,3 +107,112 @@ class ResumeSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Only PDF, DOC, and DOCX files are allowed.")
         
         return value
+
+
+class ExperienceSerializer(serializers.ModelSerializer):
+    """
+    Serializer for Experience model.
+    
+    Handles serialization and deserialization of work experience data.
+    """
+    
+    class Meta:
+        model = Experience
+        fields = '__all__'
+        read_only_fields = ('created_at', 'updated_at')
+    
+    def create(self, validated_data):
+        """Set the resume_template from the request context."""
+        validated_data['resume_template'] = self.context['resume_template']
+        return super().create(validated_data)
+
+
+class ProjectSerializer(serializers.ModelSerializer):
+    """
+    Serializer for Project model.
+    
+    Handles serialization and deserialization of project data.
+    """
+    
+    class Meta:
+        model = Project
+        fields = '__all__'
+        read_only_fields = ('created_at', 'updated_at')
+    
+    def create(self, validated_data):
+        """Set the resume_template from the request context."""
+        validated_data['resume_template'] = self.context['resume_template']
+        return super().create(validated_data)
+
+
+class EducationSerializer(serializers.ModelSerializer):
+    """
+    Serializer for Education model.
+    
+    Handles serialization and deserialization of education data.
+    """
+    
+    class Meta:
+        model = Education
+        fields = '__all__'
+        read_only_fields = ('created_at', 'updated_at')
+    
+    def create(self, validated_data):
+        """Set the resume_template from the request context."""
+        validated_data['resume_template'] = self.context['resume_template']
+        return super().create(validated_data)
+
+
+class ResumeTemplateSerializer(serializers.ModelSerializer):
+    """
+    Serializer for ResumeTemplate model.
+    
+    Handles serialization and deserialization of resume template data.
+    Includes nested serializers for related experiences, projects, and education.
+    """
+    
+    experiences = ExperienceSerializer(many=True, read_only=True)
+    projects = ProjectSerializer(many=True, read_only=True)
+    educations = EducationSerializer(many=True, read_only=True)
+    
+    class Meta:
+        model = ResumeTemplate
+        fields = '__all__'
+        read_only_fields = ('user', 'created_at', 'updated_at')
+    
+    def create(self, validated_data):
+        """Set the user from the request context."""
+        validated_data['user'] = self.context['request'].user
+        return super().create(validated_data)
+    
+    def validate_email(self, value):
+        """Validate email format."""
+        if not value:
+            raise serializers.ValidationError("Email is required.")
+        return value
+    
+    def validate_phone(self, value):
+        """Validate phone number format."""
+        if not value:
+            raise serializers.ValidationError("Phone number is required.")
+        return value
+
+
+class ResumeTemplateCreateSerializer(serializers.ModelSerializer):
+    """
+    Simplified serializer for creating resume templates.
+    
+    Used when creating a new resume template without nested data.
+    """
+    
+    class Meta:
+        model = ResumeTemplate
+        fields = ['name', 'city', 'email', 'phone', 'links', 'summary', 'skills']
+    
+    def create(self, validated_data):
+        """Set the user from the request context."""
+        validated_data['user'] = self.context['request'].user
+        return super().create(validated_data)
+
+
+

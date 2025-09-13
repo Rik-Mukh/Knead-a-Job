@@ -67,54 +67,187 @@ class JobApplication(models.Model):
         return (timezone.now().date() - self.applied_date).days
 
 
-class Resume(models.Model):
+class ResumeTemplate(models.Model):
     """
-    Model representing a resume file.
+    Model representing a user's resume template.
     
-    This model stores information about uploaded resume files,
-    allowing users to manage multiple resume versions.
+    Each user can have only one resume template that contains their personal
+    information and serves as the base for generating resumes.
     """
     
-    # Core resume fields
-    user = models.ForeignKey(User, on_delete=models.CASCADE, help_text="User who owns this resume")
-    title = models.CharField(max_length=200, help_text="Descriptive title for the resume")
-    file = models.FileField(upload_to='resumes/', help_text="The resume file")
-    is_default = models.BooleanField(default=False, help_text="Whether this is the default resume for the user")
+    user = models.OneToOneField(
+        User, 
+        on_delete=models.CASCADE, 
+        help_text="User who owns this resume template"
+    )
+    
+    # Personal Information
+    name = models.CharField(max_length=200, help_text="Full name")
+    city = models.CharField(max_length=100, help_text="City of residence")
+    email = models.EmailField(help_text="Email address")
+    phone = models.CharField(max_length=20, help_text="Phone number")
+    links = models.TextField(
+        blank=True, 
+        null=True, 
+        help_text="Links (GitHub, LinkedIn, portfolio, etc.) - one per line"
+    )
+    
+    # Professional Information
+    summary = models.TextField(
+        blank=True, 
+        null=True, 
+        help_text="Professional summary or objective"
+    )
+    skills = models.TextField(
+        blank=True, 
+        null=True, 
+        help_text="Skills - one per line or comma-separated"
+    )
     
     # Timestamps
-    created_at = models.DateTimeField(auto_now_add=True, help_text="When this resume was uploaded")
-    updated_at = models.DateTimeField(auto_now=True, help_text="When this resume was last updated")
+    created_at = models.DateTimeField(auto_now_add=True, help_text="When this template was created")
+    updated_at = models.DateTimeField(auto_now=True, help_text="When this template was last updated")
     
     class Meta:
-        # Order resumes by creation date (most recent first)
-        ordering = ['-created_at']
-        # Ensure user cannot have duplicate resume titles
-        unique_together = ['user', 'title']
+        ordering = ['-updated_at']
     
     def __str__(self):
-        """String representation of the resume."""
-        return f"{self.title} - {self.user.username}"
+        """String representation of the resume template."""
+        return f"Resume Template for {self.name}"
+
+
+class Experience(models.Model):
+    """
+    Model representing work experience entries.
     
-    def save(self, *args, **kwargs):
-        """
-        Override save method to ensure only one default resume per user.
-        
-        When a resume is set as default, all other resumes for the same user
-        are automatically set to non-default.
-        """
-        # If this resume is set as default, unset all other default resumes for this user
-        if self.is_default:
-            Resume.objects.filter(user=self.user, is_default=True).exclude(id=self.id).update(is_default=False)
-        super().save(*args, **kwargs)
+    Users can have multiple experience entries linked to their resume template.
+    """
     
-    @property
-    def file_size(self):
-        """Get the file size in a human-readable format."""
-        if self.file:
-            size = self.file.size
-            for unit in ['B', 'KB', 'MB', 'GB']:
-                if size < 1024.0:
-                    return f"{size:.1f} {unit}"
-                size /= 1024.0
-            return f"{size:.1f} TB"
-        return "Unknown"
+    resume_template = models.ForeignKey(
+        ResumeTemplate, 
+        on_delete=models.CASCADE, 
+        related_name='experiences',
+        help_text="Resume template this experience belongs to"
+    )
+    
+    # Experience details
+    company = models.CharField(max_length=200, help_text="Company name")
+    position = models.CharField(max_length=200, help_text="Job title or position")
+    location = models.CharField(max_length=200, blank=True, null=True, help_text="Work location")
+    start_date = models.DateField(help_text="Start date of employment")
+    end_date = models.DateField(blank=True, null=True, help_text="End date (leave blank if current)")
+    is_current = models.BooleanField(default=False, help_text="Is this current position?")
+    description = models.TextField(help_text="Job description and responsibilities")
+    
+    # Ordering
+    order = models.PositiveIntegerField(default=0, help_text="Order of display (higher numbers first)")
+    
+    # Timestamps
+    created_at = models.DateTimeField(auto_now_add=True, help_text="When this experience was created")
+    updated_at = models.DateTimeField(auto_now=True, help_text="When this experience was last updated")
+    
+    class Meta:
+        ordering = ['-order', '-start_date']
+        unique_together = ['resume_template', 'company', 'position', 'start_date']
+    
+    def __str__(self):
+        """String representation of the experience."""
+        return f"{self.position} at {self.company}"
+
+
+class Project(models.Model):
+    """
+    Model representing project entries.
+    
+    Users can have multiple project entries linked to their resume template.
+    """
+    
+    resume_template = models.ForeignKey(
+        ResumeTemplate, 
+        on_delete=models.CASCADE, 
+        related_name='projects',
+        help_text="Resume template this project belongs to"
+    )
+    
+    # Project details
+    name = models.CharField(max_length=200, help_text="Project name")
+    description = models.TextField(help_text="Project description")
+    technologies = models.CharField(
+        max_length=500, 
+        blank=True, 
+        null=True, 
+        help_text="Technologies used (comma-separated)"
+    )
+    url = models.URLField(blank=True, null=True, help_text="Project URL or repository")
+    start_date = models.DateField(help_text="Project start date")
+    end_date = models.DateField(blank=True, null=True, help_text="Project end date")
+    is_ongoing = models.BooleanField(default=False, help_text="Is this project ongoing?")
+    
+    # Ordering
+    order = models.PositiveIntegerField(default=0, help_text="Order of display (higher numbers first)")
+    
+    # Timestamps
+    created_at = models.DateTimeField(auto_now_add=True, help_text="When this project was created")
+    updated_at = models.DateTimeField(auto_now=True, help_text="When this project was last updated")
+    
+    class Meta:
+        ordering = ['-order', '-start_date']
+        unique_together = ['resume_template', 'name', 'start_date']
+    
+    def __str__(self):
+        """String representation of the project."""
+        return f"{self.name}"
+
+
+class Education(models.Model):
+    """
+    Model representing education entries.
+    
+    Users can have multiple education entries linked to their resume template.
+    """
+    
+    resume_template = models.ForeignKey(
+        ResumeTemplate, 
+        on_delete=models.CASCADE, 
+        related_name='educations',
+        help_text="Resume template this education belongs to"
+    )
+    
+    # Education details
+    institution = models.CharField(max_length=200, help_text="School or university name")
+    degree = models.CharField(max_length=200, help_text="Degree or certification")
+    field_of_study = models.CharField(
+        max_length=200, 
+        blank=True, 
+        null=True, 
+        help_text="Field of study or major"
+    )
+    location = models.CharField(max_length=200, blank=True, null=True, help_text="Institution location")
+    start_date = models.DateField(help_text="Start date")
+    end_date = models.DateField(blank=True, null=True, help_text="End date or graduation date")
+    gpa = models.DecimalField(
+        max_digits=3, 
+        decimal_places=2, 
+        blank=True, 
+        null=True, 
+        help_text="GPA (if applicable)"
+    )
+    is_current = models.BooleanField(default=False, help_text="Is this current education?")
+    
+    # Ordering
+    order = models.PositiveIntegerField(default=0, help_text="Order of display (higher numbers first)")
+    
+    # Timestamps
+    created_at = models.DateTimeField(auto_now_add=True, help_text="When this education was created")
+    updated_at = models.DateTimeField(auto_now=True, help_text="When this education was last updated")
+    
+    class Meta:
+        ordering = ['-order', '-start_date']
+        unique_together = ['resume_template', 'institution', 'degree', 'start_date']
+    
+    def __str__(self):
+        """String representation of the education."""
+        return f"{self.degree} from {self.institution}"
+
+
+
