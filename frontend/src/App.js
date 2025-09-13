@@ -11,6 +11,7 @@ import Navbar from './components/Navbar';
 import Dashboard from './pages/Dashboard';
 import JobApplications from './pages/JobApplications';
 import ResumeManager from './pages/ResumeManager';
+import Responses from './pages/ResponsesPage';
 
 /**
  * App Component
@@ -38,6 +39,9 @@ function App() {
             
             {/* Resume manager route - manage resume files */}
             <Route path="/resumes" element={<ResumeManager />} />
+            
+            {/* Responses route - manage responses */}
+            <Route path="/responses" element={<Responses />} />
           </Routes>
         </div>
       </div>

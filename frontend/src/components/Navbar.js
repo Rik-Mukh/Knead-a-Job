@@ -52,6 +52,18 @@ const Navbar = () => {
               Resumes
             </Link>
           </li>
+          <li>
+            <Link 
+            to="/responses" activeClassName="active"
+              style={{ 
+                color: isActive('/responses') ? '#007bff' : '#000', 
+                textDecoration: 'none',
+                fontWeight: isActive('/responses') ? 'bold' : 'normal'
+              }}
+            >
+              Responses
+            </Link>
+          </li>
         </ul>
       </div>
     </nav>

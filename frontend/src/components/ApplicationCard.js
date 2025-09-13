@@ -1,6 +1,6 @@
 import React from 'react';
 
-const ApplicationCard = ({ application, onEdit, onDelete }) => {
+const ApplicationCard = ({ application, onEdit, onDelete, onTrack }) => {
   const getStatusColor = (status) => {
     switch (status) {
       case 'applied': return '#17a2b8';
@@ -81,6 +81,13 @@ const ApplicationCard = ({ application, onEdit, onDelete }) => {
           style={{ padding: '6px 12px', fontSize: '12px' }}
         >
           Delete
+        </button>
+        <button 
+          onClick={() => onTrack(application.id)}
+          className="btn btn-outline-primary"
+          style={{ padding: '6px 12px', fontSize: '12px' }}
+        >
+          Track Response
         </button>
       </div>
     </div>

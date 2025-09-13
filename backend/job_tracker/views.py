@@ -9,7 +9,7 @@ from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from .models import JobApplication, Resume
-from .serializers import JobApplicationSerializer, ResumeSerializer
+from .serializers import JobApplicationListSerializer, JobApplicationDetailSerializer, ResumeSerializer
 
 
 class JobApplicationViewSet(viewsets.ModelViewSet):
@@ -19,10 +19,14 @@ class JobApplicationViewSet(viewsets.ModelViewSet):
     Provides CRUD operations for job applications.
     Users can only access their own applications.
     """
-    
-    serializer_class = JobApplicationSerializer
+    # Replace with IsAuthenticated later
     permission_classes = [permissions.AllowAny]  # Allow unauthenticated access for development
     pagination_class = None
+
+    def get_serializer_class(self):
+        if self.action in ['retrieve', 'update', 'partial_update']:
+            return JobApplicationDetailSerializer  # Show full fields
+        return JobApplicationListSerializer  # List view hides meeting_minutes
     
     def get_queryset(self):
         """
@@ -68,7 +72,8 @@ class JobApplicationViewSet(viewsets.ModelViewSet):
         except (ValueError, TypeError):
             limit = 5
         
-        recent_applications = self.get_queryset()[:limit]
+        # recent_applications = self.get_queryset()[:limit]
+        recent_applications = self.get_queryset().order_by('-created_at')[:limit]
         serializer = self.get_serializer(recent_applications, many=True)
         return Response(serializer.data)
 
@@ -91,7 +96,7 @@ class ResumeViewSet(viewsets.ModelViewSet):
         Returns:
             QuerySet: Filtered queryset of resumes
         """
-        return JobApplication.objects.all()
+        return Resume.objects.all()
         
     
     @action(detail=True, methods=['post'])

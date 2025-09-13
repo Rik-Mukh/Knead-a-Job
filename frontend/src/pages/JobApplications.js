@@ -9,6 +9,9 @@ const JobApplications = () => {
   const [editingApplication, setEditingApplication] = useState(null);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('all');
+  const [selectedApplicationForTracking, setSelectedApplicationForTracking] = useState(null);
+  const [meetingMinutes, setMeetingMinutes] = useState('');
+
 
   useEffect(() => {
     fetchApplications();
@@ -66,6 +69,13 @@ const JobApplications = () => {
     setShowForm(false);
     setEditingApplication(null);
   };
+
+  const handleTrackApplication = (application) => {
+    setSelectedApplicationForTracking(application);
+    setShowForm(false);
+    setEditingApplication(null);
+  };
+  
 
   const filteredApplications = applications.filter(app => 
     statusFilter === 'all' || app.status === statusFilter
@@ -132,6 +142,7 @@ const JobApplications = () => {
               application={application}
               onEdit={handleEdit}
               onDelete={handleDeleteApplication}
+              onTrack={handleTrackApplication}
             />
           ))}
         </div>

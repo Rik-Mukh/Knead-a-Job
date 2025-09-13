@@ -43,6 +43,9 @@ class JobApplication(models.Model):
     
     # Additional information
     notes = models.TextField(blank=True, null=True, help_text="Additional notes about the application")
+    # Follow-up response tracking
+    meeting_minutes = models.TextField(blank=True, null=True, help_text="Meeting notes or interview minutes related to this job")
+
     salary_range = models.CharField(max_length=100, blank=True, null=True, help_text="Salary range if available")
     location = models.CharField(max_length=200, blank=True, null=True, help_text="Job location")
     

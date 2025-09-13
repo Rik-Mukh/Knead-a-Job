@@ -8,19 +8,22 @@ Serializers handle the conversion between model instances and JSON data for API 
 from rest_framework import serializers
 from .models import JobApplication, Resume
 
-
-class JobApplicationSerializer(serializers.ModelSerializer):
-    """
-    Serializer for JobApplication model.
-    
-    Handles serialization and deserialization of job application data.
-    Automatically sets the user field from the request context.
-    """
-    
+# two serializers for the job application model so that meeting mins doesn't show on the dashboard appear on dashbaord
+    # For Dashboard/List views – hides meeting_minutes
+class JobApplicationListSerializer(serializers.ModelSerializer):
     class Meta:
         model = JobApplication
-        fields = '__all__'  # Include all model fields
-        read_only_fields = ('user', 'created_at', 'updated_at')  # Fields that cannot be modified via API
+        exclude = ['meeting_minutes']
+        read_only_fields = ('user', 'created_at', 'updated_at')
+
+
+# For Detail/Edit views – shows full fields including meeting_minutes
+class JobApplicationDetailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = JobApplication
+        fields = '__all__'
+        read_only_fields = ('user', 'created_at', 'updated_at')
+
     
     def create(self, validated_data):
         """
