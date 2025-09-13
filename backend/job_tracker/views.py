@@ -21,7 +21,7 @@ class JobApplicationViewSet(viewsets.ModelViewSet):
     """
     
     serializer_class = JobApplicationSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.AllowAny]  # Allow unauthenticated access for development
     
     def get_queryset(self):
         """
@@ -79,7 +79,7 @@ class ResumeViewSet(viewsets.ModelViewSet):
     """
     
     serializer_class = ResumeSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.AllowAny]  # Allow unauthenticated access for development
     
     def get_queryset(self):
         """
@@ -88,7 +88,8 @@ class ResumeViewSet(viewsets.ModelViewSet):
         Returns:
             QuerySet: Filtered queryset of resumes
         """
-        return Resume.objects.filter(user=self.request.user)
+        return JobApplication.objects.all()
+        
     
     @action(detail=True, methods=['post'])
     def set_default(self, request, pk=None):

@@ -6,7 +6,10 @@ It includes the admin interface and API endpoints.
 """
 
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, re_path
+from django.http import FileResponse
+from django.conf import settings
+from django.views.generic import TemplateView
 
 urlpatterns = [
     # Admin interface
@@ -14,4 +17,5 @@ urlpatterns = [
     
     # API endpoints for job tracker
     path('api/', include('job_tracker.urls')),
+    
 ]

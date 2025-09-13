@@ -8,7 +8,8 @@
 import axios from 'axios';
 
 // Base URL for job application API endpoints
-const API_BASE_URL = '/api/applications/';
+const API_BASE_URL = 'http://127.0.0.1:8000/api/applications/';
+
 
 /**
  * Job Application Service
@@ -23,8 +24,13 @@ export const applicationService = {
    * @returns {Promise<Array>} Array of job application objects
    */
   async getAll() {
-    const response = await axios.get(API_BASE_URL);
-    return response.data;
+    try {
+      const response = await axios.get(API_BASE_URL);
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching job applications:", error);
+      throw error;
+    }
   },
 
   /**

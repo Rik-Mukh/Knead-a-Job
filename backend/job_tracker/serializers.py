@@ -33,7 +33,6 @@ class JobApplicationSerializer(serializers.ModelSerializer):
             JobApplication: The created job application instance
         """
         # Set the user from the request context
-        validated_data['user'] = self.context['request'].user
         return super().create(validated_data)
     
     def validate_applied_date(self, value):
