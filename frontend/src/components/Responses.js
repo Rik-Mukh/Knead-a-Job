@@ -25,7 +25,7 @@ const Responses = () => {
     <div className="responses-page">
       <h2>Responses & Meeting Minutes</h2>
       {applications.map((app) => (
-        <div key={app.id} className="card mb-3">
+        <div key={app.id} className="card mb-3" >
           <h4>{app.company_name} - {app.position}</h4>
           <textarea
             rows="5"
@@ -39,7 +39,7 @@ const Responses = () => {
                 )
               )
             }
-            style={{ width: '100%', padding: '10px' }}
+            style={{ width: '100%', padding: '10px', }}
           />
           <button
             onClick={() => handleSave(app.id, app.meeting_minutes)}
