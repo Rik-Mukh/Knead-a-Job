@@ -16,8 +16,7 @@ A full-stack web application for tracking job applications and managing resumes,
 job-tracker/
 ├── backend/                # Django project
 │   ├── jobtracker/         # Django project settings
-│   ├── applications/       # Django app for job applications
-│   ├── resumes/            # Django app for resume storage
+│   ├── job_tracker/        # Consolidated Django app (applications + resumes)
 │   ├── requirements.txt    # Python dependencies
 │   └── manage.py
 │
@@ -98,6 +97,7 @@ The React app will be available at `http://localhost:3000`
 - `PUT /api/applications/{id}/` - Update application
 - `DELETE /api/applications/{id}/` - Delete application
 - `GET /api/applications/stats/` - Get application statistics
+- `GET /api/applications/recent/` - Get recent applications
 
 ### Resumes
 - `GET /api/resumes/` - List all resumes
