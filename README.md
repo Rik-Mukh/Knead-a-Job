@@ -82,7 +82,8 @@ The Django API will be available at `http://localhost:8000`
    ```
 3. Install dependencies:
    ```bash
- npm install react-confetti   ```
+ npm install react-confetti  
+ ```
   
 
 
