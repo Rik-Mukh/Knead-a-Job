@@ -29,12 +29,6 @@ class JobApplicationAdmin(admin.ModelAdmin):
     # Enable date-based filtering
     date_hierarchy = 'applied_date'
     
-    # Fields to display in the detail view
-    fields = [
-        'user', 'company_name', 'position', 'job_url', 'status', 
-        'applied_date', 'location', 'salary_range', 'notes'
-    ]
-    
     # Make certain fields read-only
     readonly_fields = ['created_at', 'updated_at']
     
@@ -75,9 +69,6 @@ class ResumeAdmin(admin.ModelAdmin):
     
     # Enable date-based filtering
     date_hierarchy = 'created_at'
-    
-    # Fields to display in the detail view
-    fields = ['user', 'title', 'file', 'is_default']
     
     # Make certain fields read-only
     readonly_fields = ['created_at', 'updated_at']
