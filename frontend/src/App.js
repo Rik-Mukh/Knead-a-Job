@@ -1,48 +1,47 @@
-/**
- * Main App Component
- * 
- * This is the root component of the React application.
- * It sets up the routing structure and renders the main layout.
- */
-
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import React, { useContext } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, AuthContext } from './context/AuthContext';
 import Navbar from './components/Navbar';
 import Dashboard from './pages/Dashboard';
 import JobApplications from './pages/JobApplications';
 import ResumeManager from './pages/ResumeManager';
+import Login from './pages/Login';
+import AuthSuccess from './components/AuthSuccess';
 
-/**
- * App Component
- * 
- * Main application component that provides routing and layout structure.
- * Uses React Router for navigation between different pages.
- * 
- * @returns {JSX.Element} The main app component
- */
+// Protected route component
+const ProtectedRoute = ({ element }) => {
+    const { isAuthenticated, loading } = useContext(AuthContext);
+    
+    if (loading) return <div className="loading">Loading...</div>;
+    
+    return isAuthenticated ? element : <Navigate to="/login" />;
+};
+
+// Routes component to access context
+const AppRoutes = () => {
+    return (
+        <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/auth-success" element={<AuthSuccess />} />
+            <Route path="/" element={<ProtectedRoute element={<><Navbar /><Dashboard /></>} />} />
+            <Route path="/applications" element={<ProtectedRoute element={<><Navbar /><JobApplications /></>} />} />
+            <Route path="/resumes" element={<ProtectedRoute element={<><Navbar /><ResumeManager /></>} />} />
+        </Routes>
+    );
+};
+
 function App() {
-  return (
-    <Router>
-      <div className="App">
-        {/* Navigation bar component */}
-        <Navbar />
-        
-        {/* Main content container */}
-        <div className="container">
-          <Routes>
-            {/* Dashboard route - shows overview and statistics */}
-            <Route path="/" element={<Dashboard />} />
-            
-            {/* Job applications route - manage job applications */}
-            <Route path="/applications" element={<JobApplications />} />
-            
-            {/* Resume manager route - manage resume files */}
-            <Route path="/resumes" element={<ResumeManager />} />
-          </Routes>
-        </div>
-      </div>
-    </Router>
-  );
+    return (
+        <AuthProvider>
+            <Router>
+                <div className="App">
+                    <div className="container">
+                        <AppRoutes />
+                    </div>
+                </div>
+            </Router>
+        </AuthProvider>
+    );
 }
 
 export default App;
