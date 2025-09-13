@@ -13,7 +13,7 @@ const Navbar = () => {
       backgroundColor: '#ffffff', padding: '16px 48px', height: 'fit-content',}}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         {/* App title/brand */}
-        <Link to="/" style={{
+        <Link to="/dashboard" style={{
             color: '#040fDA',
             textDecoration: 'none', 
             fontFamily: 'bree-serif',
