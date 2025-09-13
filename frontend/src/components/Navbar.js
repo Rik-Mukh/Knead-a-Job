@@ -28,15 +28,15 @@ const Navbar = () => {
         <ul style={{ display: 'flex', listStyle: 'none', margin: 0, padding: 0, gap: '48px', alignItems: 'center' }}>
           <li>
             <Link 
-              to="/" 
+              to="/responses" 
               style={{ 
-                color: isActive('/') ? '#007bff' : '#000', 
+                color: isActive('/responses') ? '#007bff' : '#000', 
                 textDecoration: 'none',
                 fontFamily: 'helvetica-neue-lt-pro',
                 fontWeight: isActive('/') ? 'bold' : 'normal'
               }}
             >
-              Dashboard
+              Responses
             </Link>
           </li>
           <li>
