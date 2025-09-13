@@ -195,6 +195,90 @@ class ResumeTemplateViewSet(viewsets.ModelViewSet):
             {'detail': 'Resume template not found'}, 
             status=status.HTTP_404_NOT_FOUND
         )
+    
+    @action(detail=False, methods=['get'])
+    def generate(self, request):
+        """Generate resume Markdown from all data."""
+        try:
+            # Get template data
+            template = ResumeTemplate.get_or_create_template()
+            
+            # Get all related data
+            experiences = Experience.objects.all().order_by('-start_date')
+            projects = Project.objects.all().order_by('-start_date')
+            educations = Education.objects.all().order_by('-start_date')
+            
+            # Generate Markdown
+            markdown = self._generate_resume_markdown(template, experiences, projects, educations)
+            
+            return Response({'markdown': markdown})
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+    def _generate_resume_markdown(self, template, experiences, projects, educations):
+        """Generate Markdown from resume data."""
+        # Format experiences
+        exp_text = ""
+        for exp in experiences:
+            exp_text += f"### {exp.position} | {exp.company}\n"
+            if exp.is_current:
+                exp_text += f"**{exp.start_date.strftime('%B %Y')} - Present**\n"
+            else:
+                exp_text += f"**{exp.start_date.strftime('%B %Y')} - {exp.end_date.strftime('%B %Y') if exp.end_date else 'Present'}**\n"
+            if exp.location:
+                exp_text += f"*{exp.location}*\n"
+            exp_text += f"{exp.description}\n\n"
+        
+        # Format education
+        edu_text = ""
+        for edu in educations:
+            edu_text += f"### {edu.degree} | {edu.institution}\n"
+            if edu.is_current:
+                edu_text += f"**{edu.start_date.strftime('%B %Y')} - Present**\n"
+            else:
+                edu_text += f"**{edu.start_date.strftime('%B %Y')} - {edu.end_date.strftime('%B %Y') if edu.end_date else 'Present'}**\n"
+            if edu.field_of_study:
+                edu_text += f"*{edu.field_of_study}*\n"
+            if edu.gpa:
+                edu_text += f"GPA: {edu.gpa}\n"
+            edu_text += "\n"
+        
+        # Format projects
+        proj_text = ""
+        for proj in projects:
+            proj_text += f"### {proj.name}\n"
+            if proj.is_ongoing:
+                proj_text += f"**{proj.start_date.strftime('%B %Y')} - Present**\n"
+            else:
+                proj_text += f"**{proj.start_date.strftime('%B %Y')} - {proj.end_date.strftime('%B %Y') if proj.end_date else 'Present'}**\n"
+            proj_text += f"{proj.description}\n"
+            if proj.technologies:
+                proj_text += f"*Technologies: {proj.technologies}*\n"
+            if proj.url:
+                proj_text += f"[View Project]({proj.url})\n"
+            proj_text += "\n"
+        
+        # Generate full Markdown
+        markdown = f"""# {template.name}
+{template.email} | {template.phone} | {template.city}
+
+## Work Experience
+{exp_text if exp_text else "No work experience added yet."}
+
+## Education
+{edu_text if edu_text else "No education added yet."}
+
+## Projects
+{proj_text if proj_text else "No projects added yet."}
+
+## Skills
+{template.skills if template.skills else "No skills added yet."}
+
+## Professional Summary
+{template.summary if template.summary else "No summary added yet."}
+"""
+        
+        return markdown
 
 class ExperienceViewSet(viewsets.ModelViewSet):
     serializer_class = ExperienceSerializer
