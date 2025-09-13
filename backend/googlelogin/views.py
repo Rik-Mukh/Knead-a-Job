@@ -3,7 +3,9 @@ from django.contrib.auth import logout as auth_logout
 from django.http import JsonResponse
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.middleware.csrf import get_token
+from django.contrib.auth.decorators import login_required
 from job_tracker.serializers import UserSerializer
+from .gmail_service import get_gmail_service, get_recent_messages
 
 def home(request):
     return render(request, 'home.html')
@@ -31,3 +33,20 @@ def get_csrf_token(request):
 def auth_success(request):
     """Handle successful Google authentication"""
     return redirect('http://localhost:3000/auth-success')
+
+@login_required
+def test_gmail(request):
+    """Test view to display recent Gmail messages in the template"""
+    messages = []
+    try:
+        # Get Gmail service for the user
+        service = get_gmail_service(request.user)
+        
+        if service:
+            # Get recent messages
+            messages = get_recent_messages(service)
+    except Exception as e:
+        print(f"Error in test_gmail view: {e}")
+    
+    # Return the home template with messages as context
+    return render(request, 'home.html', {'messages': messages})
