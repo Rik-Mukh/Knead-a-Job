@@ -56,7 +56,7 @@ const ResponsesPage = () => {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px',  }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px',}}>
         <h1>Responses / Meeting Minutes</h1>
         <button 
           onClick={fetchResponses}
@@ -67,10 +67,10 @@ const ResponsesPage = () => {
       </div>
 
       {responses.length > 0 ? (
-        <div className="grid grid-1">
+        <div className="grid grid-1" >
           {responses.map((note) => (
-            <div key={note.id} className="card" style={{ marginBottom: '20px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '15px' }}>
+            <div key={note.id} className="card" style={{ marginBottom: '20px', border: '1.5px solid black',boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '15px', }}>
                 <div>
                   <h3 style={{ margin: '0 0 8px 0' }}>{note.application.position} at {note.application.company_name}</h3>
                   <p style={{ margin: '0', color: '#666' }}>
@@ -82,10 +82,10 @@ const ResponsesPage = () => {
                 </div>
                 <span
                   style={{
-                    backgroundColor: note.application.status === 'interview' ? '#ffc107' : 
-                                   note.application.status === 'accepted' ? '#28a745' : 
-                                   note.application.status === 'rejected' ? '#dc3545' : '#17a2b8',
-                    color: 'white',
+                    backgroundColor: note.application.status === 'interview' ? '#C8F1FF' : 
+                                   note.application.status === 'accepted' ? '#E1FFCD' : 
+                                   note.application.status === 'rejected' ? 'FFCDCD' : '#17a2b8',
+                    color: 'black',
                     padding: '4px 8px',
                     borderRadius: '12px',
                     fontSize: '12px',
@@ -100,7 +100,9 @@ const ResponsesPage = () => {
                 backgroundColor: '#f8f9fa', 
                 padding: '15px', 
                 borderRadius: '8px',
-                border: '1px solid #e9ecef'
+                border: '1px solid #e9ecef',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                
               }}>
                 <h5 style={{ margin: '0 0 10px 0', color: '#495057' }}>Meeting Minutes:</h5>
                 <p style={{ margin: '0', whiteSpace: 'pre-wrap', lineHeight: '1.5' }}>
