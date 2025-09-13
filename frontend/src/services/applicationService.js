@@ -8,7 +8,8 @@
 import axios from 'axios';
 
 // Base URL for job application API endpoints
-const API_BASE_URL = '/api/applications/';
+const API_BASE_URL = 'http://127.0.0.1:8000/api/applications/';
+
 
 /**
  * Job Application Service
@@ -23,8 +24,13 @@ export const applicationService = {
    * @returns {Promise<Array>} Array of job application objects
    */
   async getAll() {
-    const response = await axios.get(API_BASE_URL);
-    return response.data;
+    try {
+      const response = await axios.get(API_BASE_URL);
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching job applications:", error);
+      throw error;
+    }
   },
 
   /**
@@ -62,6 +68,18 @@ export const applicationService = {
   },
 
   /**
+   * Update the stage of a job application
+   * 
+   * @param {number} id - The ID of the job application to update
+   * @param {Object} data - Updated job application data
+   * @returns {Promise<Object>} Updated job application object
+   */
+  async updateStage(id, data) {
+    const response = await axios.put(`${API_BASE_URL}${id}/stage/`, data);
+    return response.data;
+  },
+
+  /**
    * Delete a job application
    * 
    * @param {number} id - The ID of the job application to delete
@@ -78,6 +96,30 @@ export const applicationService = {
    */
   async getStats() {
     const response = await axios.get(`${API_BASE_URL}stats/`);
+    return response.data;
+  },
+
+  /**
+   * Get meeting notes for a job application
+   * 
+   * @returns {Promise<Array>} Array of meeting note objects
+   */
+  async getMeetingNotes() {
+    const response = await axios.get(`${API_BASE_URL}meeting-notes/`);
+    return response.data;
+  },
+
+  /**
+   * Add a meeting note to a job application
+   * 
+   * @param {number} applicationId - The ID of the job application
+   * @param {string} noteContent - The content of the meeting note
+   * @returns {Promise<Object>} Created meeting note object
+   */
+  async addMeetingNote(applicationId, noteContent) {
+    const response = await axios.post(`${API_BASE_URL}${applicationId}/notes/`, {
+      content: noteContent
+    });
     return response.data;
   },
 };

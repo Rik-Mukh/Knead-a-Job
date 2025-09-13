@@ -43,6 +43,9 @@ class JobApplication(models.Model):
     
     # Additional information
     notes = models.TextField(blank=True, null=True, help_text="Additional notes about the application")
+    # Follow-up response tracking
+    meeting_minutes = models.TextField(blank=True, null=True, help_text="Meeting notes or interview minutes related to this job")
+
     salary_range = models.CharField(max_length=100, blank=True, null=True, help_text="Salary range if available")
     location = models.CharField(max_length=200, blank=True, null=True, help_text="Job location")
     
@@ -118,3 +121,25 @@ class Resume(models.Model):
                 size /= 1024.0
             return f"{size:.1f} TB"
         return "Unknown"
+
+
+class MeetingNote(models.Model):
+    """
+    Model representing a meeting note.
+    
+    This model stores information about meeting notes related to a job application.
+    """
+    job_application = models.ForeignKey(JobApplication, on_delete=models.CASCADE, help_text="Job application related to this meeting note")
+    content = models.TextField(help_text="Content of the meeting note")
+
+    # Timestamps
+    created_at = models.DateTimeField(auto_now_add=True, help_text="When this meeting note was created")
+    updated_at = models.DateTimeField(auto_now=True, help_text="When this meeting note was last updated")
+    
+    class Meta:
+        # Order meeting notes by creation date (most recent first)
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        """String representation of the meeting note."""
+        return f"Meeting Note for {self.job_application.position} at {self.job_application.company_name}"
