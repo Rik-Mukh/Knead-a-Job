@@ -139,3 +139,7 @@ class MeetingNote(models.Model):
     class Meta:
         # Order meeting notes by creation date (most recent first)
         ordering = ['-created_at']
+    
+    def __str__(self):
+        """String representation of the meeting note."""
+        return f"Meeting Note for {self.job_application.position} at {self.job_application.company_name}"

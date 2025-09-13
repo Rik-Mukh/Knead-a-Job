@@ -159,30 +159,22 @@ class MeetingNoteViewSet(viewsets.ModelViewSet):
         Returns:
             QuerySet: Filtered queryset of meeting notes
         """
+        # For now, return all meeting notes since we're using AllowAny permissions
+        # TODO: Filter by user when authentication is implemented
         queryset = MeetingNote.objects.all()
-        application_id = self.request.query_params.get('job_application')
+        application_id = self.kwargs.get('application_id')
         if application_id:
             queryset = queryset.filter(job_application_id=application_id)
         return queryset
 
     def perform_create(self, serializer):
         """
-        Override create to handle job application validation.
+        Override create to validate the job application exists.
         """
-        print(f"DEBUG: Creating meeting note")
-        print(f"DEBUG: Request data: {self.request.data}")
-        print(f"DEBUG: Validated data: {serializer.validated_data}")
-        
-        # Validate that the job application exists
-        job_application_id = serializer.validated_data.get('job_application')
-        if job_application_id:
-            try:
-                job_application = JobApplication.objects.get(id=job_application_id)
-                print(f"DEBUG: Found job application: {job_application}")
-                serializer.save()
-            except JobApplication.DoesNotExist:
-                print(f"DEBUG: Job application {job_application_id} not found")
-                raise serializers.ValidationError("Job application not found")
+        # Get the job_application from the validated data
+        job_application = serializer.validated_data.get('job_application')
+        if job_application:
+            # job_application is already a JobApplication instance from the serializer
+            serializer.save()
         else:
-            print("DEBUG: No job_application in validated data")
             raise serializers.ValidationError("Job application is required")
