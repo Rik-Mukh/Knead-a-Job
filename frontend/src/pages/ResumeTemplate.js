@@ -13,6 +13,8 @@ const ResumeTemplate = () => {
   const [activeTab, setActiveTab] = useState('resume-preview');
   const [resumeMarkdown, setResumeMarkdown] = useState('');
   const [resumeHtml, setResumeHtml] = useState('');
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [customMarkdown, setCustomMarkdown] = useState('');
 
   // Form states
   const [formData, setFormData] = useState({
@@ -97,6 +99,7 @@ const ResumeTemplate = () => {
     try {
       const response = await resumeTemplateService.generateResume();
       setResumeMarkdown(response.markdown);
+      setCustomMarkdown(response.markdown); // Initialize custom markdown
       
       // Convert Markdown to HTML
       const html = marked(response.markdown, { breaks: true });
@@ -104,6 +107,63 @@ const ResumeTemplate = () => {
     } catch (error) {
       console.error('Error generating resume:', error);
       alert('Error generating resume: ' + error.message);
+    }
+  };
+
+  const toggleEditMode = () => {
+    if (!isEditMode) {
+      // Switching to edit mode - use current markdown
+      setCustomMarkdown(resumeMarkdown);
+    } else {
+      // Switching to preview mode - update preview with custom markdown
+      const html = marked(customMarkdown, { breaks: true });
+      setResumeHtml(html);
+    }
+    setIsEditMode(!isEditMode);
+  };
+
+  const handleMarkdownChange = (e) => {
+    const newMarkdown = e.target.value;
+    setCustomMarkdown(newMarkdown);
+    
+    // Live preview update
+    const html = marked(newMarkdown, { breaks: true });
+    setResumeHtml(html);
+  };
+
+  const saveCustomMarkdown = async () => {
+    try {
+      console.log('Saving custom markdown:', customMarkdown);
+      console.log('Template data being sent:', { custom_markdown: customMarkdown });
+      
+      // Save custom markdown to template
+      const response = await resumeTemplateService.updateTemplate({ 
+        custom_markdown: customMarkdown 
+      });
+      
+      console.log('Save response:', response);
+      setResumeMarkdown(customMarkdown);
+      alert('Custom resume saved successfully!');
+    } catch (error) {
+      console.error('Error saving custom resume:', error);
+      console.error('Error details:', error.response || error.message);
+      alert('Error saving custom resume: ' + error.message);
+    }
+  };
+
+  const revertToGenerated = async () => {
+    try {
+      const response = await resumeTemplateService.generateResume();
+      setResumeMarkdown(response.markdown);
+      setCustomMarkdown(response.markdown);
+      
+      const html = marked(response.markdown, { breaks: true });
+      setResumeHtml(html);
+      
+      alert('Reverted to auto-generated resume');
+    } catch (error) {
+      console.error('Error reverting resume:', error);
+      alert('Error reverting resume: ' + error.message);
     }
   };
 
@@ -366,30 +426,96 @@ const ResumeTemplate = () => {
                 Generate Resume
               </button>
               {resumeHtml && (
-                <button 
-                  className="btn btn-success"
-                  onClick={generatePDF}
-                >
-                  Download PDF
-                </button>
+                <>
+                  <button 
+                    className={`btn me-2 ${isEditMode ? 'btn-warning' : 'btn-info'}`}
+                    onClick={toggleEditMode}
+                  >
+                    {isEditMode ? 'Preview Mode' : 'Edit Mode'}
+                  </button>
+                  <button 
+                    className="btn btn-success me-2"
+                    onClick={generatePDF}
+                  >
+                    Download PDF
+                  </button>
+                  {isEditMode && (
+                    <>
+                      <button 
+                        className="btn btn-success me-2"
+                        onClick={saveCustomMarkdown}
+                      >
+                        Save Custom
+                      </button>
+                      <button 
+                        className="btn btn-secondary"
+                        onClick={revertToGenerated}
+                      >
+                        Revert to Generated
+                      </button>
+                    </>
+                  )}
+                </>
               )}
             </div>
           </div>
           
           {resumeHtml ? (
-            <div 
-              className="resume-content"
-              dangerouslySetInnerHTML={{ __html: resumeHtml }}
-              style={{
-                border: '1px solid #ddd',
-                padding: '20px',
-                backgroundColor: 'white',
-                fontFamily: 'Arial, sans-serif',
-                lineHeight: '1.6',
-                maxWidth: '800px',
-                margin: '0 auto'
-              }}
-            />
+            isEditMode ? (
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                {/* Markdown Editor */}
+                <div>
+                  <h5>Edit Markdown</h5>
+                  <textarea
+                    value={customMarkdown}
+                    onChange={handleMarkdownChange}
+                    style={{
+                      width: '100%',
+                      height: '600px',
+                      fontFamily: 'Monaco, Consolas, "Courier New", monospace',
+                      fontSize: '14px',
+                      padding: '10px',
+                      border: '1px solid #ddd',
+                      borderRadius: '4px',
+                      resize: 'vertical'
+                    }}
+                    placeholder="Edit your resume markdown here..."
+                  />
+                </div>
+                
+                {/* Live Preview */}
+                <div>
+                  <h5>Live Preview</h5>
+                  <div 
+                    className="resume-content"
+                    dangerouslySetInnerHTML={{ __html: resumeHtml }}
+                    style={{
+                      border: '1px solid #ddd',
+                      padding: '20px',
+                      backgroundColor: 'white',
+                      fontFamily: 'Arial, sans-serif',
+                      lineHeight: '1.6',
+                      height: '600px',
+                      overflowY: 'auto'
+                    }}
+                  />
+                </div>
+              </div>
+            ) : (
+              <div 
+                className="resume-content"
+                dangerouslySetInnerHTML={{ __html: resumeHtml }}
+                style={{
+                  border: '1px solid #ddd',
+                  padding: '20px',
+                  backgroundColor: 'white',
+                  fontFamily: 'Arial, sans-serif',
+                  lineHeight: '1.6',
+                  maxWidth: '800px',
+                  margin: '0 auto'
+                }}
+              />
+            )
           ) : (
             <div className="text-center text-muted">
               <p>Click "Generate Resume" to create your resume preview</p>

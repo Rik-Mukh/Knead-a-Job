@@ -182,7 +182,7 @@ class ResumeTemplateCreateSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = ResumeTemplate
-        fields = ['name', 'city', 'email', 'phone', 'links', 'summary', 'skills']
+        fields = ['name', 'city', 'email', 'phone', 'links', 'summary', 'skills', 'custom_markdown']
     
     def create(self, validated_data):
         """Create or update the singleton template."""

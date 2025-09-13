@@ -158,6 +158,9 @@ class ResumeTemplateViewSet(viewsets.ModelViewSet):
         Returns:
             Response: JSON response with updated template data
         """
+        print(f"Update request data: {request.data}")
+        print(f"Request method: {request.method}")
+        
         template = ResumeTemplate.objects.first()
         if not template:
             # Create new template if none exists
@@ -168,14 +171,17 @@ class ResumeTemplateViewSet(viewsets.ModelViewSet):
                 phone=request.data.get('phone', ''),
                 links=request.data.get('links', ''),
                 summary=request.data.get('summary', ''),
-                skills=request.data.get('skills', '')
+                skills=request.data.get('skills', ''),
+                custom_markdown=request.data.get('custom_markdown', '')
             )
         else:
             # Update existing template
-            for field in ['name', 'city', 'email', 'phone', 'links', 'summary', 'skills']:
+            for field in ['name', 'city', 'email', 'phone', 'links', 'summary', 'skills', 'custom_markdown']:
                 if field in request.data:
+                    print(f"Updating field {field} with value: {request.data[field]}")
                     setattr(template, field, request.data[field])
             template.save()
+            print(f"Template saved successfully")
         
         serializer = self.get_serializer(template)
         return Response(serializer.data)
@@ -202,6 +208,10 @@ class ResumeTemplateViewSet(viewsets.ModelViewSet):
         try:
             # Get template data
             template = ResumeTemplate.get_or_create_template()
+            
+            # Check if custom markdown exists
+            if template.custom_markdown:
+                return Response({'markdown': template.custom_markdown})
             
             # Get all related data
             experiences = Experience.objects.all().order_by('-start_date')

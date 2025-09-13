@@ -60,8 +60,10 @@ class ResumeTemplateService {
    * @returns {Promise<Object>} The updated template data
    */
   async updateTemplate(templateData) {
-    const response = await fetch(`${API_BASE_URL}/resume-template/`, {
-      method: 'POST',
+    console.log('updateTemplate called with:', templateData);
+    
+    const response = await fetch(`${API_BASE_URL}/resume-template/update/`, {
+      method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
       },
@@ -69,9 +71,12 @@ class ResumeTemplateService {
       body: JSON.stringify(templateData),
     });
 
+    console.log('updateTemplate response status:', response.status);
+
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.detail || `HTTP error! status: ${response.status}`);
+      console.error('updateTemplate error:', errorData);
+      throw new Error(errorData.detail || errorData.error || `HTTP error! status: ${response.status}`);
     }
 
     return await response.json();

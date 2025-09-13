@@ -27,4 +27,6 @@ router.register(r'educations', EducationViewSet, basename='education')
 urlpatterns = [
     # Include all router-generated URLs
     path('', include(router.urls)),
+    # Add specific URL for singleton resume template update
+    path('resume-template/update/', ResumeTemplateViewSet.as_view({'put': 'update'}), name='resume-template-update'),
 ]

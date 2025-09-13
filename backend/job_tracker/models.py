@@ -98,6 +98,13 @@ class ResumeTemplate(models.Model):
         help_text="Skills - one per line or comma-separated"
     )
     
+    # Custom Resume
+    custom_markdown = models.TextField(
+        blank=True, 
+        null=True, 
+        help_text="Custom resume markdown (user-edited version)"
+    )
+    
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True, help_text="When this template was created")
     updated_at = models.DateTimeField(auto_now=True, help_text="When this template was last updated")
