@@ -121,5 +121,7 @@ class MeetingNoteAdmin(admin.ModelAdmin):
     
     def content_preview(self, obj):
         """Return a preview of the content (first 50 characters)."""
+        if not obj.content:
+            return "No content"
         return obj.content[:50] + '...' if len(obj.content) > 50 else obj.content
     content_preview.short_description = 'Content Preview'

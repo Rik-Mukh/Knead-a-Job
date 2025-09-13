@@ -14,7 +14,9 @@ const ResponsesPage = () => {
     try {
       setLoading(true);
       // Get all meeting notes
-      const meetingNotes = await meetingNotesService.getAll();
+      const meetingNotesResponse = await meetingNotesService.getAll();
+       // Normalize response: use results if present, otherwise assume it's already an array
+      const meetingNotes = meetingNotesResponse.results || meetingNotesResponse || [];
       
       // Get all applications to match with meeting notes
       const applications = await applicationService.getAll();
