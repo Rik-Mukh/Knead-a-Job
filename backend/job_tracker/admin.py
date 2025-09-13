@@ -6,7 +6,7 @@ It defines how models are displayed and managed in the admin panel.
 """
 
 from django.contrib import admin
-from .models import JobApplication, Resume, MeetingNote
+from .models import JobApplication, Resume, MeetingNote, Notification
 
 
 @admin.register(JobApplication)
@@ -125,3 +125,68 @@ class MeetingNoteAdmin(admin.ModelAdmin):
             return "No content"
         return obj.content[:50] + '...' if len(obj.content) > 50 else obj.content
     content_preview.short_description = 'Content Preview'
+
+
+@admin.register(Notification)
+class NotificationAdmin(admin.ModelAdmin):
+    """
+    Admin configuration for Notification model.
+    
+    Defines how notifications are displayed and managed in the admin interface.
+    """
+    
+    # Fields to display in the list view
+    list_display = ['title', 'user', 'job_application', 'show_date', 'is_read', 'is_active', 'created_at']
+    
+    # Fields to filter by in the admin interface
+    list_filter = ['is_read', 'is_active', 'show_date', 'created_at', 'user']
+    
+    # Fields to search by
+    search_fields = ['title', 'message', 'user__username', 'job_application__position', 'job_application__company_name']
+    
+    # Enable date-based filtering
+    date_hierarchy = 'show_date'  # Changed from 'created_at' to 'show_date'
+    
+    # Make certain fields read-only
+    readonly_fields = ['created_at', 'updated_at', 'should_show']
+    
+    # Group related fields together
+    fieldsets = (
+        ('Notification Information', {
+            'fields': ('user', 'job_application', 'title', 'message')
+        }),
+        ('Display Settings', {
+            'fields': ('show_date', 'is_read', 'is_active')  # Changed from 'Notification Settings'
+        }),
+        ('System Information', {
+            'fields': ('should_show', 'created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    # Add custom actions
+    actions = ['mark_as_read', 'mark_as_unread', 'activate_notifications', 'deactivate_notifications']
+    
+    def mark_as_read(self, request, queryset):
+        """Mark selected notifications as read."""
+        updated = queryset.update(is_read=True)
+        self.message_user(request, f'{updated} notifications marked as read.')
+    mark_as_read.short_description = 'Mark selected notifications as read'
+    
+    def mark_as_unread(self, request, queryset):
+        """Mark selected notifications as unread."""
+        updated = queryset.update(is_read=False)
+        self.message_user(request, f'{updated} notifications marked as unread.')
+    mark_as_unread.short_description = 'Mark selected notifications as unread'
+    
+    def activate_notifications(self, request, queryset):
+        """Activate selected notifications."""
+        updated = queryset.update(is_active=True)
+        self.message_user(request, f'{updated} notifications activated.')
+    activate_notifications.short_description = 'Activate selected notifications'
+    
+    def deactivate_notifications(self, request, queryset):
+        """Deactivate selected notifications."""
+        updated = queryset.update(is_active=False)
+        self.message_user(request, f'{updated} notifications deactivated.')
+    deactivate_notifications.short_description = 'Deactivate selected notifications'
