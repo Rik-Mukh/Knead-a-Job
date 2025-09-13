@@ -1,11 +1,32 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { notificationService } from '../services/notificationService';
 
 const Navbar = () => {
   const location = useLocation();
 
-  // Example: unread notifications count
-  const [unreadCount, setUnreadCount] = useState(3); // you can fetch this from backend
+  // Dynamic unread notifications count
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch unread notification count on component mount
+  useEffect(() => {
+    const fetchUnreadCount = async () => {
+      try {
+        setLoading(true);
+        const response = await notificationService.getUnreadCount();
+        setUnreadCount(response.unread_count || 0);
+      } catch (error) {
+        console.error('Error fetching unread notification count:', error);
+        // Set to 0 on error to prevent showing incorrect count
+        setUnreadCount(0);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUnreadCount();
+  }, []);
 
   const isActive = (path) => location.pathname === path;
 
@@ -79,7 +100,7 @@ const Navbar = () => {
               }}
             >
               Notifications
-              {unreadCount > 0 && (
+              {!loading && unreadCount > 0 && (
                 <span 
                   style={{
                     marginLeft: '6px',
