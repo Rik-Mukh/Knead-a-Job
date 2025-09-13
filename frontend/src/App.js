@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { NotificationProvider } from './contexts/NotificationContext';
 import Navbar from './components/Navbar';
 import Dashboard from './pages/Dashboard';
 import JobApplications from './pages/JobApplications';
@@ -24,31 +25,33 @@ import ResponsesPage from './pages/ResponsesPage';
  */
 function App() {
   return (
-    <Router>
-      <div className="App">
-        {/* Navigation bar component */}
-        <Navbar />
-        
-        {/* Main content container */}
-        <div className="container">
-          <Routes>
-            {/* Dashboard route - shows overview and statistics */}
-            <Route path="/" element={<Dashboard />} />
-            
-            {/* Job applications route - manage job applications */}
-            <Route path="/applications" element={<JobApplications />} />
-            
-            {/* Resume manager route - manage resume files */}
-            <Route path="/resumes" element={<ResumeManager />} />
-            
-            {/* Notifications route */}
-            <Route path="/notifications" element={<NotificationsPage />} />
-            
-            <Route path="/responses" element={<ResponsesPage />} />
-          </Routes>
+    <NotificationProvider>
+      <Router>
+        <div className="App">
+          {/* Navigation bar component */}
+          <Navbar />
+          
+          {/* Main content container */}
+          <div className="container">
+            <Routes>
+              {/* Dashboard route - shows overview and statistics */}
+              <Route path="/" element={<Dashboard />} />
+              
+              {/* Job applications route - manage job applications */}
+              <Route path="/applications" element={<JobApplications />} />
+              
+              {/* Resume manager route - manage resume files */}
+              <Route path="/resumes" element={<ResumeManager />} />
+              
+              {/* Notifications route */}
+              <Route path="/notifications" element={<NotificationsPage />} />
+              
+              <Route path="/responses" element={<ResponsesPage />} />
+            </Routes>
+          </div>
         </div>
-      </div>
-    </Router>
+      </Router>
+    </NotificationProvider>
   );
 }
 

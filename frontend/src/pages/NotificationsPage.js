@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import NotificationCard from '../components/NotificationCard';
 import { notificationService } from '../services/notificationService';
+import { useNotification } from '../contexts/NotificationContext';
 
 const NotificationsPage = () => {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { refreshUnreadCount } = useNotification();
 
   useEffect(() => {
     fetchNotifications();
@@ -35,6 +37,8 @@ const NotificationsPage = () => {
     try {
       await notificationService.markAsRead(id);
       setNotifications(notifications.map(n => n.id === id ? {...n, is_read: true} : n));
+      // Refresh the unread count in the navbar
+      refreshUnreadCount();
     } catch (error) {
       console.error('Error marking notification as read:', error);
     }
