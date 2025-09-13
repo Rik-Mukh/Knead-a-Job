@@ -2,40 +2,53 @@ import React, { useState, useEffect } from "react";
 import Timeline from "../components/Timeline"; 
 import { applicationService } from "../services/applicationService";
 import { resumeService } from "../services/resumeService";
+import Confetti from 'react-confetti';
 
 import "./Dashboard.css";
 
+// Status mapping with colors
 const STATUS_MAP = {
   offer: { label: "Offer", color: "#E1FFCD" },
+  accepted: { label: "Accepted", color: "#E1FFCD" },
   applied: { label: "Applied", color: "#EFEFEF" },
   interview: { label: "Interview", color: "#C8F1FF" },
   rejected: { label: "Rejected", color: "#FFCDCD" },
   withdrawn: { label: "Withdrawn", color: "#6c757d" },
 };
 
+// Statistic cards mapping
 const STATCARD_MAP = {
-  applied: { label: "Job", color: "#efefef" },
-  interview: { label: "Interview", color: "#c8f1ff" },
-  rejected: { label: "Rejection", color: "#e1ffcd" },
-  offer: { label: "Offer", color: "#ffcdcd" }
+  applied: { label: "Job", color: "#EFEFEF" },
+  interview: { label: "Interview", color: "#C8F1FF" },
+  rejected: { label: "Rejection", color: "#FFCDCD" },
+  offer: { label: "Offer", color: "#E1FFCD" },
+  accepted: { label: "Accepted", color: "#E1FFCD" },
 };
 
+// Status badge component
 const StatusBadge = ({ status }) => {
   if (!status) return null;
   const key = status.toLowerCase();
   const s = STATUS_MAP[key] || { label: status, color: "#6c757d" };
-
   return (
-    <span className="status-badge" style={{ backgroundColor: s.color }}>
-      <span className="status-dot" style={{ backgroundColor: "#fff" }} />
-      <span>{s.label}</span>
+    <span 
+      className="status-badge" 
+      style={{ 
+        backgroundColor: s.color, 
+        padding: "4px 8px",
+        borderRadius: "12px",
+        textTransform: "capitalize",
+        fontSize: "12px"
+      }}
+    >
+      {s.label}
     </span>
   );
 };
 
+// Statistic card component
 const StatisticCard = ({ type, count }) => {
   const stat = count !== 1 ? `${STATCARD_MAP[type].label}s` : STATCARD_MAP[type].label;
-
   return (
     <div
       className="statCard"
@@ -48,27 +61,18 @@ const StatisticCard = ({ type, count }) => {
         color: "black",
         width: "100%",
         height: "100%",
-        padding: "24px 24px",
+        padding: "24px",
         boxSizing: "border-box",
         borderRadius: "24px"
       }}
     >
-      <div
-        className="stat"
-        style={{ font: "normal 400 6.25rem helvetica-neue-lt-pro" }}
-      >
-        {count}
-      </div>
-      <div
-        className="label"
-        style={{ font: "normal 300 2rem helvetica-neue-lt-pro" }}
-      >
-        {stat}
-      </div>
+      <div style={{ font: "normal 400 6.25rem helvetica-neue-lt-pro" }}>{count}</div>
+      <div style={{ font: "normal 300 2rem helvetica-neue-lt-pro" }}>{stat}</div>
     </div>
   );
 };
 
+// Format date helper
 const formatDate = (dateString) => {
   if (!dateString) return "";
   const dt = new Date(dateString);
@@ -83,14 +87,7 @@ const Dashboard = () => {
   const [recentApplications, setRecentApplications] = useState([]);
   const [defaultResume, setDefaultResume] = useState(null);
   const [loading, setLoading] = useState(true);
-
-  const [stats, setStats] = useState({
-    applied: 0,
-    interviews: 0,
-    rejected: 0,
-    offers: 0
-  });
-
+  const [stats, setStats] = useState({ applied: 0, interviews: 0, rejected: 0, offers: 0 });
   const [selectedApp, setSelectedApp] = useState(null);
 
   useEffect(() => {
@@ -157,7 +154,9 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="dashboard-wrap">
+    <div className="dashboard-wrap" style={{ position: "relative" }}>
+      {hasOffer && <Confetti width={width} height={height} numberOfPieces={200} recycle={false} />}
+
       {/* Hero */}
       <div className="dashboard-hero">
         <div className="hero-date">{formatDate(new Date())}</div>
@@ -173,8 +172,7 @@ const Dashboard = () => {
           alignItems: "center",
           width: "100%",
           height: "16.75rem",
-          padding: "10px 10px",
-          boxSizing: "border-box",
+          padding: "10px",
           gap: "16px"
         }}
       >
@@ -185,7 +183,7 @@ const Dashboard = () => {
       </section>
 
       {/* Applications Table */}
-      <div className="table-card">
+      <div className="table-card" style={{ marginTop: "24px" }}>
         <table className="app-table" aria-label="Recent applications">
           <thead>
             <tr>
@@ -204,27 +202,20 @@ const Dashboard = () => {
                 </td>
               </tr>
             )}
-            {recentApplications.map((app) => (
+            {recentApplications.map(app => (
               <tr key={app.id || app.company_name + app.applied_date}>
-                <td className="company-cell">{app.company_name}</td>
+                <td>{app.company_name}</td>
                 <td>{app.position}</td>
-                <td
-                  style={{ cursor: "pointer" }}
+                {/* Date Applied opens timeline, no URL style */}
+                <td 
+                  style={{ cursor: "default", color: "#000" }}
                   onClick={() => setSelectedApp(app)}
                 >
                   {formatDate(app.applied_date)}
                 </td>
+                <td><StatusBadge status={app.status} /></td>
                 <td>
-                  <StatusBadge status={app.status} />
-                </td>
-                <td>
-                  <a
-                    className="resume-link"
-                    href={app.resume_url || "#"}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={(e) => e.stopPropagation()}
-                  >
+                  <a href={app.resume_url || "#"} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}>
                     {app.resume_file || "Resume.pdf"}
                   </a>
                 </td>
@@ -238,15 +229,11 @@ const Dashboard = () => {
       {defaultResume && (
         <div style={{ marginTop: "24px" }}>
           <div className="table-card">
-            <h4 style={{ marginBottom: "8px" }}>{defaultResume.title}</h4>
-            <p style={{ margin: "0 0 8px 0", color: "#666", fontSize: "14px" }}>
+            <h4>{defaultResume.title}</h4>
+            <p style={{ color: "#666", fontSize: "14px" }}>
               Uploaded: {formatDate(defaultResume.created_at)}
             </p>
-            <button
-              className="btn btn-primary"
-              style={{ fontSize: "14px" }}
-              onClick={() => window.open(defaultResume.file_url, "_blank")}
-            >
+            <button className="btn btn-primary" onClick={() => window.open(defaultResume.file_url, "_blank")}>
               Download Resume
             </button>
           </div>
@@ -254,11 +241,7 @@ const Dashboard = () => {
       )}
 
       {/* Timeline Modal */}
-      <Timeline
-        isOpen={!!selectedApp}
-        onClose={() => setSelectedApp(null)}
-        application={selectedApp}
-      />
+      <Timeline isOpen={!!selectedApp} onClose={() => setSelectedApp(null)} application={selectedApp} />
     </div>
   );
 };
