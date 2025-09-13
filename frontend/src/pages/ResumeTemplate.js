@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { marked } from 'marked';
+import html2pdf from 'html2pdf.js';
 import { resumeTemplateService } from '../services/resumeTemplateService';
 
 const ResumeTemplate = () => {
@@ -103,6 +104,53 @@ const ResumeTemplate = () => {
     } catch (error) {
       console.error('Error generating resume:', error);
       alert('Error generating resume: ' + error.message);
+    }
+  };
+
+  const generatePDF = () => {
+    if (!resumeHtml) {
+      alert('Please generate a resume first before creating PDF');
+      return;
+    }
+
+    try {
+      // Create a temporary element with the resume content
+      const element = document.createElement('div');
+      element.innerHTML = resumeHtml;
+      element.className = 'resume-content';
+      
+      // Apply PDF-specific styling
+      element.style.fontFamily = 'Arial, sans-serif';
+      element.style.lineHeight = '1.6';
+      element.style.color = '#333';
+      element.style.maxWidth = 'none';
+      element.style.margin = '0';
+      element.style.padding = '20px';
+      
+      // PDF generation options
+      const opt = {
+        margin: [0.5, 0.5, 0.5, 0.5], // top, right, bottom, left
+        filename: `${template?.name || 'resume'}_resume.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { 
+          scale: 2,
+          useCORS: true,
+          letterRendering: true
+        },
+        jsPDF: { 
+          unit: 'in', 
+          format: 'letter', 
+          orientation: 'portrait',
+          compress: true
+        },
+        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+      };
+
+      // Generate and download PDF
+      html2pdf().set(opt).from(element).save();
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      alert('Error generating PDF: ' + error.message);
     }
   };
 
@@ -310,12 +358,22 @@ const ResumeTemplate = () => {
         <div className="card">
           <div className="d-flex justify-content-between align-items-center mb-3">
             <h3>Resume Preview</h3>
-            <button 
-              className="btn btn-primary"
-              onClick={generateResume}
-            >
-              Generate Resume
-            </button>
+            <div>
+              <button 
+                className="btn btn-primary me-2"
+                onClick={generateResume}
+              >
+                Generate Resume
+              </button>
+              {resumeHtml && (
+                <button 
+                  className="btn btn-success"
+                  onClick={generatePDF}
+                >
+                  Download PDF
+                </button>
+              )}
+            </div>
           </div>
           
           {resumeHtml ? (
