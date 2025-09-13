@@ -15,6 +15,9 @@ import ResumeManager from './pages/ResumeManager';
 import NotificationsPage from './pages/NotificationsPage'; 
 import ResponsesPage from './pages/ResponsesPage'; 
 
+import Login from './pages/Login'; // Add this import
+
+
 /**
  * App Component
  * 
@@ -34,8 +37,11 @@ function App() {
           {/* Main content container */}
           <div className="container">
             <Routes>
+
+            <Route path="/" element={<Login />} />
+
               {/* Dashboard route - shows overview and statistics */}
-              <Route path="/" element={<Dashboard />} />
+              <Route path="/dashboard" element={<Dashboard />} />
               
               {/* Job applications route - manage job applications */}
               <Route path="/applications" element={<JobApplications />} />
