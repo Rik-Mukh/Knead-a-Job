@@ -16,6 +16,7 @@ import NotificationsPage from './pages/NotificationsPage';
 import ResponsesPage from './pages/ResponsesPage'; 
 import Login from './pages/Login';
 import ResumeTemplate from './pages/ResumeTemplate';
+import MatchAnalysis from './pages/MatchAnalysis';
 
 /**
  * App Component
@@ -46,6 +47,9 @@ function App() {
               
               {/* Resume template route - manage structured resume data */}
               <Route path="/resume-template" element={<ResumeTemplate />} />
+              
+              {/* Match analysis route - analyze resume match scores */}
+              <Route path="/match-analysis" element={<MatchAnalysis />} />
               
               {/* Notifications route */}
               <Route path="/notifications" element={<NotificationsPage />} />

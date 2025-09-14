@@ -64,6 +64,19 @@ const Navbar = () => {
               Resumes
             </Link>
           </li>
+          <li>
+            <Link 
+              to="/match-analysis"
+              style={{ 
+                color: isActive('/match-analysis') ? '#007bff' : '#000', 
+                textDecoration: 'none',
+                fontFamily: 'helvetica-neue-lt-pro',
+                fontWeight: isActive('/match-analysis') ? 'bold' : 'normal'
+              }}
+            >
+              Match Analysis
+            </Link>
+          </li>
 
           {/* Notifications link */}
           <li style={{ position: 'relative' }}>

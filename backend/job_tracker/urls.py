@@ -10,7 +10,7 @@ from rest_framework.routers import DefaultRouter
 
 from .views import (
     JobApplicationViewSet, ResumeTemplateViewSet, MeetingNoteViewSet, UserViewSet,
-    ExperienceViewSet, ProjectViewSet, EducationViewSet, NotificationViewSet
+    ExperienceViewSet, ProjectViewSet, EducationViewSet, NotificationViewSet, MatchScoreView
 )
 
 
@@ -33,4 +33,5 @@ router.register(r'educations', EducationViewSet, basename='education')
 urlpatterns = [
     # Include all router-generated URLs
     path('', include(router.urls)),
+    path('ai/match/', MatchScoreView.as_view(), name='ai-match'),
 ]

@@ -113,6 +113,7 @@ const JobApplicationForm = ({ onSubmit, initialData = {} }) => {
         />
       </div>
 
+
       <div className="form-group">
         <label className="form-label">Notes</label>
         <textarea
@@ -129,6 +130,7 @@ const JobApplicationForm = ({ onSubmit, initialData = {} }) => {
           {initialData.id ? 'Update Application' : 'Add Application'}
         </button>
       </div>
+
     </form>
   );
 };
