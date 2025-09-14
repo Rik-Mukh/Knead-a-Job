@@ -182,6 +182,13 @@ code {
   border: none;
 }
 
+/* Center the contact information line below the name */
+.resume-content h1 + p {
+  text-align: center;
+  margin: 0 0 20px 0;
+  font-size: 13px;
+}
+
 .resume-content h2 {
   color: #000;
   font-size: 16px;
@@ -308,6 +315,13 @@ code {
     margin: 0 0 10px 0 !important;
     padding: 0 !important;
     border: none !important;
+  }
+
+  /* Center the contact information line below the name in PDF */
+  .resume-content h1 + p {
+    text-align: center !important;
+    margin: 0 0 20px 0 !important;
+    font-size: 13px !important;
   }
 
   .resume-content h2 {

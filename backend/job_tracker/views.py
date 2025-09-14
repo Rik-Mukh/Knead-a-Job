@@ -395,7 +395,34 @@ class ResumeTemplateViewSet(viewsets.ModelViewSet):
         
         # Generate full Markdown
         markdown = f"# {template.name}\n"
-        markdown += f"{template.email} | {template.phone} | {template.city}\n\n"
+        
+        # Build contact information line
+        contact_parts = [template.email, template.phone, template.city]
+        
+        # Add links if they exist
+        if template.links and template.links.strip():
+            # Split links by newline and filter out empty lines
+            raw_links = [link.strip() for link in template.links.split('\n') if link.strip()]
+            
+            # Process links to make GitHub and LinkedIn display as text
+            processed_links = []
+            for link in raw_links:
+                # Ensure link has protocol
+                if not link.startswith(('http://', 'https://')):
+                    link = 'https://' + link
+                
+                # Check if it's GitHub or LinkedIn and format accordingly
+                if 'github.com' in link.lower():
+                    processed_links.append(f"[GitHub]({link})")
+                elif 'linkedin.com' in link.lower():
+                    processed_links.append(f"[LinkedIn]({link})")
+                else:
+                    # For other links, keep the original URL
+                    processed_links.append(link)
+            
+            contact_parts.extend(processed_links)
+        
+        markdown += " | ".join(contact_parts) + "\n\n"
         
         # Only include sections that have content
         if exp_text.strip():
