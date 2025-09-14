@@ -10,7 +10,8 @@ from rest_framework.routers import DefaultRouter
 
 from .views import (
     JobApplicationViewSet, ResumeTemplateViewSet, MeetingNoteViewSet, UserViewSet,
-    ExperienceViewSet, ProjectViewSet, EducationViewSet, NotificationViewSet
+    ExperienceViewSet, ProjectViewSet, EducationViewSet, NotificationViewSet,
+    generate_project_description, generate_experience_summary, generate_personal_summary
 )
 
 
@@ -33,4 +34,9 @@ router.register(r'educations', EducationViewSet, basename='education')
 urlpatterns = [
     # Include all router-generated URLs
     path('', include(router.urls)),
+    
+    # AI Content Generation endpoints
+    path('ai/generate-project-description/', generate_project_description, name='generate-project-description'),
+    path('ai/generate-experience-summary/', generate_experience_summary, name='generate-experience-summary'),
+    path('ai/generate-personal-summary/', generate_personal_summary, name='generate-personal-summary'),
 ]
