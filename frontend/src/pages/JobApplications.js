@@ -109,7 +109,7 @@ const JobApplications = () => {
     <div style={{ padding: '20px' }}>
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-        <h1>Job Applications</h1>
+        <h1 style={{font: "normal 500 2.5rem helvetica-neue-lt-pro"}}>Job Applications</h1>
         <button onClick={() => setShowForm(true)} className="btn btn-primary">
           Add Application
         </button>
