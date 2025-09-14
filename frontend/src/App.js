@@ -15,7 +15,9 @@ import ResumeManager from './pages/ResumeManager';
 import NotificationsPage from './pages/NotificationsPage'; 
 import ResponsesPage from './pages/ResponsesPage'; 
 import Login from './pages/Login';
-
+import ResumeTemplate from './pages/ResumeTemplate';
+import GmailMessages from './components/GmailMessages';
+import MatchAnalysis from './pages/MatchAnalysis';
 /**
  * App Component
  * 
