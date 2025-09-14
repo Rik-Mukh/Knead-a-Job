@@ -53,10 +53,10 @@ const JobApplications = () => {
     }
   };
 
-  const handleDeleteApplication = async (id) => {
+  const handleDeleteApplication = async (application) => {
     if (window.confirm('Are you sure you want to delete this application?')) {
       try {
-        await applicationService.delete(id);
+        await applicationService.delete(application.id);
         fetchApplications();
       } catch (error) {
         console.error('Error deleting application:', error);
