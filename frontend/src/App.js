@@ -14,9 +14,8 @@ import JobApplications from './pages/JobApplications';
 import ResumeManager from './pages/ResumeManager';
 import NotificationsPage from './pages/NotificationsPage'; 
 import ResponsesPage from './pages/ResponsesPage'; 
-
-import Login from './pages/Login'; // Add this import
-
+import Login from './pages/Login';
+import ResumeTemplate from './pages/ResumeTemplate';
 
 /**
  * App Component
@@ -37,8 +36,7 @@ function App() {
           {/* Main content container */}
           <div className="container">
             <Routes>
-
-            <Route path="/" element={<Login />} />
+              <Route path="/" element={<Login />} />
 
               {/* Dashboard route - shows overview and statistics */}
               <Route path="/dashboard" element={<Dashboard />} />
@@ -46,8 +44,8 @@ function App() {
               {/* Job applications route - manage job applications */}
               <Route path="/applications" element={<JobApplications />} />
               
-              {/* Resume manager route - manage resume files */}
-              <Route path="/resumes" element={<ResumeManager />} />
+              {/* Resume template route - manage structured resume data */}
+              <Route path="/resume-template" element={<ResumeTemplate />} />
               
               {/* Notifications route */}
               <Route path="/notifications" element={<NotificationsPage />} />
@@ -62,3 +60,36 @@ function App() {
 }
 
 export default App;
+
+
+//function AppLayout() {
+//  const location = useLocation();
+//
+//  return (
+//    <div className="App">
+//      {/* Only show Navbar if not on "/" */}
+//      {location.pathname !== "/" && <Navbar />}
+//      
+//      <div className="container">
+//        <Routes>
+//          <Route path="/" element={<Login />} />
+//          <Route path="/dashboard" element={<Dashboard />} />
+//          <Route path="/applications" element={<JobApplications />} />
+//          <Route path="/resumes" element={<ResumeManager />} />
+//          <Route path="/notifications" element={<NotificationsPage />} />
+//          <Route path="/responses" element={<ResponsesPage />} />
+//        </Routes>
+//      </div>
+//    </div>
+//  );
+//}
+//
+//function App() {
+//  return (
+//    <NotificationProvider>
+//      <Router>
+//        <AppLayout />
+//      </Router>
+//    </NotificationProvider>
+//  );
+//}//////////////////////////////////////////////////////////////
