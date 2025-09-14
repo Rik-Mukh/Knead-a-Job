@@ -8,6 +8,53 @@
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
 
 class ResumeTemplateService {
+  constructor() {
+    this.csrfToken = null;
+  }
+
+  /**
+   * Get CSRF token from Django
+   * @returns {Promise<string>} The CSRF token
+   */
+  async getCsrfToken() {
+    if (this.csrfToken) {
+      return this.csrfToken;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/csrf-token/`, {
+        method: 'GET',
+        credentials: 'include',
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        this.csrfToken = data.csrfToken;
+        return this.csrfToken;
+      }
+    } catch (error) {
+      console.warn('Could not fetch CSRF token:', error);
+    }
+
+    return null;
+  }
+
+  /**
+   * Get headers with CSRF token for requests
+   * @returns {Promise<Object>} Headers object with CSRF token
+   */
+  async getHeaders() {
+    const csrfToken = await this.getCsrfToken();
+    const headers = {
+      'Content-Type': 'application/json',
+    };
+
+    if (csrfToken) {
+      headers['X-CSRFToken'] = csrfToken;
+    }
+
+    return headers;
+  }
   /**
    * Get the current user's resume template
    * @returns {Promise<Object>} The resume template data
@@ -37,11 +84,10 @@ class ResumeTemplateService {
    * @returns {Promise<Object>} The created template data
    */
   async createTemplate(templateData) {
+    const headers = await this.getHeaders();
     const response = await fetch(`${API_BASE_URL}/resume-template/`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
       credentials: 'include',
       body: JSON.stringify(templateData),
     });
@@ -62,11 +108,10 @@ class ResumeTemplateService {
   async updateTemplate(templateData) {
     console.log('updateTemplate called with:', templateData);
     
+    const headers = await this.getHeaders();
     const response = await fetch(`${API_BASE_URL}/resume-template/update/`, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
       credentials: 'include',
       body: JSON.stringify(templateData),
     });
@@ -87,11 +132,10 @@ class ResumeTemplateService {
    * @returns {Promise<void>}
    */
   async deleteTemplate() {
+    const headers = await this.getHeaders();
     const response = await fetch(`${API_BASE_URL}/resume-template/`, {
       method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
       credentials: 'include',
     });
 
@@ -126,9 +170,10 @@ class ResumeTemplateService {
   }
 
   async createExperience(experienceData) {
+    const headers = await this.getHeaders();
     const res = await fetch(`${API_BASE_URL}/experiences/`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       credentials: 'include',
       body: JSON.stringify(experienceData),
     });
@@ -142,11 +187,10 @@ class ResumeTemplateService {
   }
 
   async updateExperience(id, experienceData) {
+    const headers = await this.getHeaders();
     const response = await fetch(`${API_BASE_URL}/experiences/${id}/`, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
       credentials: 'include',
       body: JSON.stringify(experienceData),
     });
@@ -160,11 +204,10 @@ class ResumeTemplateService {
   }
 
   async deleteExperience(id) {
+    const headers = await this.getHeaders();
     const response = await fetch(`${API_BASE_URL}/experiences/${id}/`, {
       method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
       credentials: 'include',
     });
 
@@ -199,11 +242,10 @@ class ResumeTemplateService {
   }
 
   async createProject(projectData) {
+    const headers = await this.getHeaders();
     const response = await fetch(`${API_BASE_URL}/projects/`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
       credentials: 'include',
       body: JSON.stringify(projectData),
     });
@@ -217,11 +259,10 @@ class ResumeTemplateService {
   }
 
   async updateProject(id, projectData) {
+    const headers = await this.getHeaders();
     const response = await fetch(`${API_BASE_URL}/projects/${id}/`, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
       credentials: 'include',
       body: JSON.stringify(projectData),
     });
@@ -235,11 +276,10 @@ class ResumeTemplateService {
   }
 
   async deleteProject(id) {
+    const headers = await this.getHeaders();
     const response = await fetch(`${API_BASE_URL}/projects/${id}/`, {
       method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
       credentials: 'include',
     });
 
@@ -274,11 +314,10 @@ class ResumeTemplateService {
   }
 
   async createEducation(educationData) {
+    const headers = await this.getHeaders();
     const response = await fetch(`${API_BASE_URL}/educations/`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
       credentials: 'include',
       body: JSON.stringify(educationData),
     });
@@ -292,11 +331,10 @@ class ResumeTemplateService {
   }
 
   async updateEducation(id, educationData) {
+    const headers = await this.getHeaders();
     const response = await fetch(`${API_BASE_URL}/educations/${id}/`, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
       credentials: 'include',
       body: JSON.stringify(educationData),
     });
@@ -310,11 +348,10 @@ class ResumeTemplateService {
   }
 
   async deleteEducation(id) {
+    const headers = await this.getHeaders();
     const response = await fetch(`${API_BASE_URL}/educations/${id}/`, {
       method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
       credentials: 'include',
     });
 

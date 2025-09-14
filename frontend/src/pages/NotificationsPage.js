@@ -59,19 +59,11 @@ const NotificationsPage = () => {
   return (
     <div style={{ padding: '36px', maxWidth: '800px', margin: '0 auto' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-        <h1 style={{ margin: 0 }}>Notifications</h1>
-        <button 
+        <h1 style={{ margin: 0, font: "normal 500 2.5rem helvetica-neue-lt-pro" }}>Notifications</h1>
+        <button
+          className="btn btn-primary" 
           onClick={fetchNotifications}
           disabled={loading}
-          style={{
-            padding: '8px 16px',
-            backgroundColor: '#007bff',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: loading ? 'not-allowed' : 'pointer',
-            opacity: loading ? 0.6 : 1
-          }}
         >
           {loading ? 'Loading...' : 'Refresh'}
         </button>
