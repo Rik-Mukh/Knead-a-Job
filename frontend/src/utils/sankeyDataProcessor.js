@@ -31,9 +31,26 @@ export const processApplicationsForSankey = (applications) => {
     return acc;
   }, {});
 
+  // Calculate counts according to new requirements:
+  // 1. Applied = total count of all applications (regardless of current status)
+  // 2. Interview = combination of interview, accepted, and rejected statuses
+  // 3. Accepted and Rejected stay the same
+  // 4. Withdrawn stays the same
+  const totalApplications = applications.length;
+  const interviewCount = (statusCounts.interview || 0) + (statusCounts.accepted || 0) + (statusCounts.rejected || 0);
+  
+  // Create adjusted counts for Sankey diagram
+  const adjustedCounts = {
+    applied: totalApplications,
+    interview: interviewCount,
+    accepted: statusCounts.accepted || 0,
+    rejected: statusCounts.rejected || 0,
+    withdrawn: statusCounts.withdrawn || 0
+  };
+
   // Create nodes for each stage that has applications
   const nodes = stages
-    .filter(stage => statusCounts[stage.id] > 0)
+    .filter(stage => adjustedCounts[stage.id] > 0)
     .map(stage => ({
       id: stage.id,
       label: stage.label,
@@ -45,60 +62,39 @@ export const processApplicationsForSankey = (applications) => {
   // Interview → Accepted or Rejected
   const links = [];
   
-  // Flow 1: Applied → Interview
-  if (statusCounts.applied > 0 && statusCounts.interview > 0) {
+  // Flow 1: Applied → Interview (using adjusted count)
+  if (adjustedCounts.applied > 0 && adjustedCounts.interview > 0) {
     links.push({
       source: 'applied',
       target: 'interview',
-      value: statusCounts.interview
+      value: adjustedCounts.interview
     });
   }
   
   // Flow 2: Applied → Withdrawn (for applications that were withdrawn before interview)
-  if (statusCounts.applied > 0 && statusCounts.withdrawn > 0) {
+  if (adjustedCounts.applied > 0 && adjustedCounts.withdrawn > 0) {
     links.push({
       source: 'applied',
       target: 'withdrawn',
-      value: statusCounts.withdrawn
+      value: adjustedCounts.withdrawn
     });
   }
   
   // Flow 3: Interview → Accepted
-  if (statusCounts.interview > 0 && statusCounts.accepted > 0) {
+  if (adjustedCounts.interview > 0 && adjustedCounts.accepted > 0) {
     links.push({
       source: 'interview',
       target: 'accepted',
-      value: statusCounts.accepted
+      value: adjustedCounts.accepted
     });
   }
   
   // Flow 4: Interview → Rejected
-  if (statusCounts.interview > 0 && statusCounts.rejected > 0) {
+  if (adjustedCounts.interview > 0 && adjustedCounts.rejected > 0) {
     links.push({
       source: 'interview',
       target: 'rejected',
-      value: statusCounts.rejected
-    });
-  }
-
-  // Handle edge cases where applications might be in final states without going through the flow
-  // This can happen if data was imported or status was changed directly
-  
-  // If there are accepted applications but no interview applications, show direct flow from applied
-  if (statusCounts.accepted > 0 && statusCounts.interview === 0 && statusCounts.applied > 0) {
-    links.push({
-      source: 'applied',
-      target: 'accepted',
-      value: statusCounts.accepted
-    });
-  }
-  
-  // If there are rejected applications but no interview applications, show direct flow from applied
-  if (statusCounts.rejected > 0 && statusCounts.interview === 0 && statusCounts.applied > 0) {
-    links.push({
-      source: 'applied',
-      target: 'rejected',
-      value: statusCounts.rejected
+      value: adjustedCounts.rejected
     });
   }
 
