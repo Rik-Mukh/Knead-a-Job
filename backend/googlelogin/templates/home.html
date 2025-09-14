@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Gmail Integration</title>     
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4285F4;
+            --primary-hover: #3367d6;
+            --secondary-color: #fbbc05;
+            --text-color: #202124;
+            --light-gray: #f5f5f5;
+            --border-color: #dadce0;
+            --read-color: #f8f9fa;
+            --unread-color: #ffffff;
+            --gray-text: #5f6368;
+            --red: #ea4335;
+            --green: #34a853;
+        }
+        
+        /* Base styles - same as before */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--light-gray);
+            padding: 0;
+            margin: 0;
+        }
+        
+        /* Container and header styles - same as before */
+        .container { max-width: 900px; margin: 0 auto; padding: 20px; }
+        header { background-color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); padding: 16px 0; margin-bottom: 24px; }
+        .header-content { display: flex; justify-content: space-between; align-items: center; max-width: 900px; margin: 0 auto; padding: 0 20px; }
+        .app-title { color: var(--primary-color); display: flex; align-items: center; gap: 10px; }
+        .user-info { display: flex; align-items: center; gap: 16px; }
+        .user-name { font-weight: 500; }
+        
+        /* Button styles - same as before */
+        .btn {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+        
+        .btn:hover { background-color: var(--primary-hover); }
+        .btn-secondary { background-color: transparent; color: var(--primary-color); border: 1px solid var(--border-color); }
+        .btn-secondary:hover { background-color: rgba(66, 133, 244, 0.04); }
+        
+        /* Page structure - same as before */
+        .page-title { font-size: 24px; margin-bottom: 24px; font-weight: 500; }
+        .status-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .refresh-form { margin-bottom: 24px; }
+        .message-count { color: var(--gray-text); font-size: 14px; }
+        .error-message { background-color: #fce8e6; border-left: 4px solid var(--red); color: #d93025; padding: 16px; margin-bottom: 24px; border-radius: 4px; }
+        
+        /* Message list styles */
+        .message-list {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .message {
+            border-bottom: 1px solid var(--border-color);
+            transition: box-shadow 0.2s;
+        }
+        
+        .message:last-child { border-bottom: none; }
+        
+        .message:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* Message header styles - same as before */
+        .message-header {
+            display: flex;
+            justify-content: space-between;
+            padding: 16px;
+            gap: 16px;
+            cursor: pointer;
+        }
+        
+        .message-left { flex: 1; }
+        .message-sender { font-weight: 500; margin-bottom: 4px; }
+        .message-subject { font-weight: 500; margin-bottom: 6px; }
+        .message-snippet { color: var(--gray-text); font-size: 14px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; }
+        .message-date { color: var(--gray-text); font-size: 12px; white-space: nowrap; }
+        
+        /* Message body styles - IMPROVED */
+        .message-body {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out;
+            background-color: var(--light-gray);
+        }
+        
+        .message-body-inner {
+            padding: 16px;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .message.expanded .message-body {
+            max-height: 2000px; /* Increased to accommodate larger emails */
+        }
+        
+        /* Email content styles - IMPROVED */
+        .message-content {
+            background-color: white;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+        }
+        
+        .email-iframe {
+            width: 100%;
+            min-height: 200px;
+            border: none;
+            transition: height 0.3s ease;
+        }
+        
+        .email-controls {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 16px;
+            background-color: #f1f3f4;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .email-body-text {
+            padding: 16px;
+            white-space: pre-line;
+            font-family: 'Roboto', Arial, sans-serif;
+            line-height: 1.5;
+            color: #202124;
+        }
+        
+        .email-toggle-view {
+            background: none;
+            border: none;
+            color: var(--primary-color);
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        
+        .no-content {
+            padding: 16px;
+            color: var(--gray-text);
+            font-style: italic;
+            text-align: center;
+        }
+        
+        .resize-handle {
+            height: 10px;
+            background-color: #f1f3f4;
+            cursor: ns-resize;
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+            line-height: 10px;
+            font-size: 10px;
+            color: var(--gray-text);
+        }
+        
+        /* Other styles - same as before */
+        .toggle-button { background: transparent; border: none; color: var(--primary-color); cursor: pointer; font-size: 14px; padding: 8px 0; display: flex; align-items: center; font-weight: 500; }
+        .login-container { text-align: center; padding: 48px 0; }
+        .login-heading { margin-bottom: 24px; font-weight: 400; font-size: 24px; }
+        .no-messages { text-align: center; padding: 32px 16px; color: var(--gray-text); }
+        
+        @media (max-width: 600px) {
+            .header-content, .container { padding: 0 16px; }
+            .message-header { flex-direction: column; }
+            .message-date { align-self: flex-start; }
+        }
+    </style>
+    <script>
+        // Function to handle expanding/collapsing messages
+        document.addEventListener('DOMContentLoaded', () => {
+            // Message expansion functionality
+            document.querySelectorAll('.message-header').forEach(header => {
+                header.addEventListener('click', () => {
+                    const message = header.closest('.message');
+                    message.classList.toggle('expanded');
+                    
+                    // If message has iframe, adjust its height after expanding
+                    if (message.classList.contains('expanded')) {
+                        const iframe = message.querySelector('iframe');
+                        if (iframe) {
+                            setTimeout(() => {
+                                adjustIframeHeight(iframe);
+                            }, 100);
+                        }
+                    }
+                });
+            });
+            
+            // Function to adjust iframe height based on content
+            function adjustIframeHeight(iframe) {
+                try {
+                    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                    const height = iframeDoc.body.scrollHeight;
+                    iframe.style.height = (height + 20) + 'px';
+                } catch (e) {
+                    console.log('Cannot access iframe content due to CORS policy');
+                }
+            }
+            
+            // Handle iframe load events
+            document.querySelectorAll('iframe').forEach(iframe => {
+                iframe.onload = function() {
+                    adjustIframeHeight(iframe);
+                };
+            });
+            
+            // Toggle between HTML and text view
+            document.querySelectorAll('.email-toggle-view').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const content = button.closest('.message-content');
+                    const iframe = content.querySelector('.email-iframe');
+                    const textView = content.querySelector('.email-body-text');
+                    
+                    if (iframe.style.display !== 'none') {
+                        iframe.style.display = 'none';
+                        textView.style.display = 'block';
+                        button.textContent = 'Show HTML View';
+                    } else {
+                        iframe.style.display = 'block';
+                        textView.style.display = 'none';
+                        button.textContent = 'Show Plain Text View';
+                    }
+                });
+            });
+            
+            // Make iframe resizable
+            document.querySelectorAll('.resize-handle').forEach(handle => {
+                handle.addEventListener('mousedown', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    const iframe = handle.previousElementSibling;
+                    const startY = e.clientY;
+                    const startHeight = parseInt(iframe.style.height || '300');
+                    
+                    function handleMouseMove(e) {
+                        const delta = e.clientY - startY;
+                        iframe.style.height = (startHeight + delta) + 'px';
+                    }
+                    
+                    function handleMouseUp() {
+                        document.removeEventListener('mousemove', handleMouseMove);
+                        document.removeEventListener('mouseup', handleMouseUp);
+                    }
+                    
+                    document.addEventListener('mousemove', handleMouseMove);
+                    document.addEventListener('mouseup', handleMouseUp);
+                });
+            });
+        });
+    </script>
+</head>
+<body>
+    {% load socialaccount %}
+    
+    <header>
+        <div class="header-content">
+            <h1 class="app-title">
+                <svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <path d="M0 0h24v24H0z" fill="none"/>
+                    <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V8l8 5 8-5v10zm-8-7L4 6h16l-8 5z" fill="#4285F4"/>
+                </svg>
+                Gmail Integration
+            </h1>
+            
+            {% if user.is_authenticated %}
+            <div class="user-info">
+                <span class="user-name">{{ user.get_full_name }}</span>
+                <a href="{% url 'logout' %}" class="btn btn-secondary">Logout</a>
+            </div>
+            {% endif %}
+        </div>
+    </header>
+    
+    <div class="container">
+        {% if user.is_authenticated %}
+            <h2 class="page-title">Your Gmail Messages</h2>
+            
+            <form action="{% url 'test_gmail' %}" method="get" class="refresh-form">
+                <button type="submit" class="btn">Refresh Messages</button>
+            </form>
+            
+            {% if error_message %}
+                <div class="error-message">
+                    {{ error_message }}
+                    <p>Please make sure you've granted the necessary Gmail permissions.</p>
+                </div>
+            {% endif %}
+            
+            {% if messages %}
+                <div class="status-bar">
+                    <span class="message-count">Showing {{ messages|length }} messages</span>
+                </div>
+                
+                <div class="message-list">
+                    {% for message in messages %}
+                        <div class="message">
+                            <div class="message-header">
+                                <div class="message-left">
+                                    <div class="message-sender">{{ message.from }}</div>
+                                    <div class="message-subject">{{ message.subject }}</div>
+                                    <div class="message-snippet">{{ message.snippet }}</div>
+                                </div>
+                                <div class="message-date">{{ message.date }}</div>
+                            </div>
+                            <div class="message-body">
+                                <div class="message-body-inner">
+                                    <div class="message-content">
+                                        {% comment %} {% if message.html_body %}
+                                            <div class="email-controls">
+                                                <span>Email Content</span>
+                                                <button class="email-toggle-view">Show Plain Text View</button>
+                                            </div>
+                                            <iframe class="email-iframe" srcdoc="{{ message.html_body|escapejs }}" style="width:100%; height:400px; border:none;"></iframe>
+                                            <div class="resize-handle" title="Drag to resize">⋯</div>
+                                            <div class="email-body-text" style="display:none;">
+                                                {% if message.text_body %}
+                                                    {{ message.text_body|linebreaks }}
+                                                {% else %}
+                                                    {{ message.snippet }}
+                                                {% endif %}
+                                            </div> {% endcomment %}
+                                        {% if message.text_body %}
+                                            <div class="email-body-text">
+                                                {{ message.text_body|linebreaks }}
+                                            </div>
+                                        {% else %}
+                                            <div class="no-content">
+                                                <em>No message content available</em>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="no-messages">
+                    {% if not error_message %}
+                        <p>No messages found. Click "Refresh Messages" to load your emails.</p>
+                    {% endif %}
+                </div>
+            {% endif %}
+        {% else %}
+            <div class="login-container">
+                <h2 class="login-heading">Access your Gmail messages</h2>
+                <p>Please log in with your Google account to view your emails.</p>
+                <br>
+                <a href="{% provider_login_url 'google' %}?next=/" class="btn">Login with Google</a>
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>
