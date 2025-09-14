@@ -8,7 +8,7 @@ import React from 'react';
 
 const LogInButton = () => {
     return (
-        <button style={{cursor: "pointer", border: "none", width: '100%', height: '100%', paddingLeft: 8, paddingRight: 8, paddingTop: 12, paddingBottom: 12, background: '#00B7FF', boxShadow: '0px 4px 4px rgba(0, 0, 0, 0.25)', overflow: 'hidden', borderRadius: 200, justifyContent: 'center', alignItems: 'center', display: 'inline-flex'}}>
+        <button style={{cursor: "pointer", border: "none", width: '100%', height: '100%', paddingLeft: 8, paddingRight: 8, paddingTop: 8, paddingBottom: 8, background: '#00B7FF', boxShadow: '0px 4px 4px rgba(0, 0, 0, 0.25)', overflow: 'hidden', borderRadius: 200, justifyContent: 'center', alignItems: 'center', display: 'inline-flex'}}>
             <div style={{color: 'white', fontSize: 12, fontFamily: 'helvetica-neue-lt-pro', fontWeight: '500', wordWrap: 'break-word'}}>Sign in</div>
         </button> 
     )
@@ -16,7 +16,7 @@ const LogInButton = () => {
 
 const SignUpButton = () => {
     return (
-        <button style={{cursor: "pointer", border: "none", width: '100%', height: '100%', padding: 12, background: 'white', boxShadow: '0px 4px 4px rgba(0, 0, 0, 0.25)', overflow: 'hidden', borderRadius: 200, justifyContent: 'center', alignItems: 'center', display: 'inline-flex'}}>
+        <button style={{cursor: "pointer", border: "none", width: '100%', height: '100%', padding: "8px", background: 'white', boxShadow: '0px 4px 4px rgba(0, 0, 0, 0.25)', overflow: 'hidden', borderRadius: 200, justifyContent: 'center', alignItems: 'center', display: 'inline-flex'}}>
             <div style={{color: '#1E1E1E', fontSize: 12, fontFamily: 'helvetica-neue-lt-pro', fontWeight: '500', wordWrap: 'break-word'}}>Sign up</div>
         </button>  
     )
