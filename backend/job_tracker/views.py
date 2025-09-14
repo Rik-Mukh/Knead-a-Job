@@ -130,24 +130,55 @@ class JobApplicationViewSet(viewsets.ModelViewSet):
 
     def update(self, request, *args, **kwargs):
         """
-        Override update method to trigger notifications when status changes.
+        Override update method to track status changes with timestamps and trigger notifications.
         """
         instance = self.get_object()
         old_status = instance.status
+        new_status = request.data.get('status', old_status)
         
-        print(f"DEBUG: Updating job application {instance.id} from status '{old_status}' to '{request.data.get('status', 'unknown')}'")
+        print(f"DEBUG: Updating job application {instance.id} from status '{old_status}' to '{new_status}'")
+        
+        # Track status change timestamps
+        if old_status != new_status:
+            # Prefer client-provided timestamp (user's local time) if available; fallback to server time
+            from django.utils.dateparse import parse_datetime
+            client_ts_str = request.data.get('client_event_timestamp') or request.data.get('client_timestamp')
+            event_dt = timezone.now()
+            if client_ts_str:
+                parsed = parse_datetime(client_ts_str)
+                if parsed:
+                    if timezone.is_naive(parsed):
+                        parsed = timezone.make_aware(parsed, timezone.get_current_timezone())
+                    event_dt = parsed
+            
+            # Set the appropriate datetime field based on the new status
+            if new_status == 'interview' and not instance.interview_date:
+                instance.interview_date = event_dt
+                print(f"DEBUG: Set interview_date to {event_dt}")
+            elif new_status == 'rejected' and not instance.rejected_date:
+                instance.rejected_date = event_dt
+                print(f"DEBUG: Set rejected_date to {event_dt}")
+            elif new_status == 'accepted' and not instance.accepted_date:
+                instance.accepted_date = event_dt
+                print(f"DEBUG: Set accepted_date to {event_dt}")
+            elif new_status == 'withdrawn' and not instance.withdrawn_date:
+                instance.withdrawn_date = event_dt
+                print(f"DEBUG: Set withdrawn_date to {event_dt}")
+            
+            # Save the instance with the new datetime field
+            instance.save()
         
         # Call the parent update method
         response = super().update(request, *args, **kwargs)
         
         # Refresh the instance to get the updated status
         instance.refresh_from_db()
-        new_status = instance.status
+        final_status = instance.status
         
-        print(f"DEBUG: Status changed from '{old_status}' to '{new_status}'")
+        print(f"DEBUG: Final status after update: '{final_status}'")
         
         # Check if status changed from 'applied' to 'interview'
-        if old_status == 'applied' and new_status == 'interview':
+        if old_status == 'applied' and final_status == 'interview':
             print("DEBUG: Creating notifications for status change to interview")
             
             # Create immediate notification (show now)
@@ -169,7 +200,7 @@ class JobApplicationViewSet(viewsets.ModelViewSet):
             )
             print("DEBUG: Created future notification")
         else:
-            print(f"DEBUG: No notification needed - status change from '{old_status}' to '{new_status}'")
+            print(f"DEBUG: No notification needed - status change from '{old_status}' to '{final_status}'")
         
         return response
 

@@ -41,6 +41,12 @@ class JobApplication(models.Model):
     )
     applied_date = models.DateField(help_text="Date when the application was submitted")
     
+    # Status change tracking for timeline (store timezone-aware datetimes)
+    interview_date = models.DateTimeField(blank=True, null=True, help_text="Date/time when status changed to interview")
+    rejected_date = models.DateTimeField(blank=True, null=True, help_text="Date/time when status changed to rejected")
+    accepted_date = models.DateTimeField(blank=True, null=True, help_text="Date/time when status changed to accepted")
+    withdrawn_date = models.DateTimeField(blank=True, null=True, help_text="Date/time when status changed to withdrawn")
+    
     # Additional information
     notes = models.TextField(blank=True, null=True, help_text="Additional notes about the application")
     # Follow-up response tracking

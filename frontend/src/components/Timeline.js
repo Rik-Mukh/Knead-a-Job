@@ -6,12 +6,29 @@ const Timeline = ({ isOpen, onClose, application }) => {
 
   const events = [
     { key: "applied_date", label: "Application Date" },
-    { key: "interview_one", label: "Interview One" },
-    { key: "interview_two", label: "Interview Two" },
-    { key: "offer_date", label: "Offer" },
+    { key: "interview_date", label: "Interview" },
+    { key: "accepted_date", label: "Accepted" },
+    { key: "rejected_date", label: "Rejected" },
+    { key: "withdrawn_date", label: "Withdrawn" },
   ];
 
   const visibleEvents = events.filter((e) => application[e.key]);
+
+  const formatEvent = (value) => {
+    try {
+      const dt = new Date(value);
+      // Prefer showing both date and time in the user's locale
+      return dt.toLocaleString(undefined, {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    } catch (e) {
+      return String(value);
+    }
+  };
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -39,11 +56,7 @@ const Timeline = ({ isOpen, onClose, application }) => {
               <div className="timeline-content">
                 <strong>{e.label}:</strong>
                 <div>
-                  {new Date(application[e.key]).toLocaleDateString(undefined, {
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric", 
-                  })}
+                  {formatEvent(application[e.key])}
                 </div>
               </div>
             </div>
