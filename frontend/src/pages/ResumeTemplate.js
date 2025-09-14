@@ -97,7 +97,8 @@ const ResumeTemplate = () => {
 
   const generateResume = async () => {
     try {
-      const response = await resumeTemplateService.generateResume();
+      // Use generateFreshResume to get content from database, not custom markdown
+      const response = await resumeTemplateService.generateFreshResume();
       setResumeMarkdown(response.markdown);
       setCustomMarkdown(response.markdown); // Initialize custom markdown
       

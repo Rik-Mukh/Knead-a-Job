@@ -374,37 +374,71 @@ class ResumeTemplateViewSet(viewsets.ModelViewSet):
         # Format projects
         proj_text = ""
         for proj in projects:
-            proj_text += f"### {proj.name}\n"
+            # Format project name with technologies on same line, make title clickable if URL exists
+            if proj.url:
+                if proj.technologies:
+                    proj_text += f"### [{proj.name}]({proj.url}) | {proj.technologies}\n"
+                else:
+                    proj_text += f"### [{proj.name}]({proj.url})\n"
+            else:
+                if proj.technologies:
+                    proj_text += f"### {proj.name} | {proj.technologies}\n"
+                else:
+                    proj_text += f"### {proj.name}\n"
+            
             if proj.is_ongoing:
                 proj_text += f"**{proj.start_date.strftime('%B %Y')} - Present**\n"
             else:
                 proj_text += f"**{proj.start_date.strftime('%B %Y')} - {proj.end_date.strftime('%B %Y') if proj.end_date else 'Present'}**\n"
             proj_text += f"{proj.description}\n"
-            if proj.technologies:
-                proj_text += f"*Technologies: {proj.technologies}*\n"
-            if proj.url:
-                proj_text += f"[View Project]({proj.url})\n"
             proj_text += "\n"
         
         # Generate full Markdown
-        markdown = f"""# {template.name}
-{template.email} | {template.phone} | {template.city}
-
-## Work Experience
-{exp_text if exp_text else "No work experience added yet."}
-
-## Education
-{edu_text if edu_text else "No education added yet."}
-
-## Projects
-{proj_text if proj_text else "No projects added yet."}
-
-## Skills
-{template.skills if template.skills else "No skills added yet."}
-
-## Professional Summary
-{template.summary if template.summary else "No summary added yet."}
-"""
+        markdown = f"# {template.name}\n"
+        
+        # Build contact information line
+        contact_parts = [template.email, template.phone, template.city]
+        
+        # Add links if they exist
+        if template.links and template.links.strip():
+            # Split links by newline and filter out empty lines
+            raw_links = [link.strip() for link in template.links.split('\n') if link.strip()]
+            
+            # Process links to make GitHub and LinkedIn display as text
+            processed_links = []
+            for link in raw_links:
+                # Ensure link has protocol
+                if not link.startswith(('http://', 'https://')):
+                    link = 'https://' + link
+                
+                # Check if it's GitHub or LinkedIn and format accordingly
+                if 'github.com' in link.lower():
+                    processed_links.append(f"[GitHub]({link})")
+                elif 'linkedin.com' in link.lower():
+                    processed_links.append(f"[LinkedIn]({link})")
+                else:
+                    # For other links, keep the original URL
+                    processed_links.append(link)
+            
+            contact_parts.extend(processed_links)
+        
+        markdown += " | ".join(contact_parts) + "\n\n"
+        
+        # Only include sections that have content
+        if exp_text.strip():
+            markdown += f"## Work Experience\n{exp_text}\n"
+        
+        if edu_text.strip():
+            markdown += f"## Education\n{edu_text}\n"
+        
+        if proj_text.strip():
+            markdown += f"## Projects\n{proj_text}\n"
+        
+        if template.skills and template.skills.strip():
+            markdown += f"## Skills\n{template.skills}\n\n"
+        
+        if template.summary and template.summary.strip():
+            markdown += f"## Professional Summary\n{template.summary}\n"
         
         return markdown
     
