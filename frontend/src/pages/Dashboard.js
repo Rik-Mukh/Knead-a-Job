@@ -18,7 +18,7 @@ const STATUS_MAP = {
 
 // Statistic cards mapping
 const STATCARD_MAP = {
-  applied: { label: "Applications", color: "#EFEFEF" },
+  applied: { label: "Application", color: "#EFEFEF" },
   interview: { label: "Interview", color: "#C8F1FF" },
   rejected: { label: "Rejection", color: "#FFCDCD" },
   offer: { label: "Offer", color: "#E1FFCD" },

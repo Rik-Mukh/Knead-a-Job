@@ -41,6 +41,12 @@ class JobApplication(models.Model):
     )
     applied_date = models.DateField(help_text="Date when the application was submitted")
     
+    # Status change tracking for timeline (store timezone-aware datetimes)
+    interview_date = models.DateTimeField(blank=True, null=True, help_text="Date/time when status changed to interview")
+    rejected_date = models.DateTimeField(blank=True, null=True, help_text="Date/time when status changed to rejected")
+    accepted_date = models.DateTimeField(blank=True, null=True, help_text="Date/time when status changed to accepted")
+    withdrawn_date = models.DateTimeField(blank=True, null=True, help_text="Date/time when status changed to withdrawn")
+    
     # Additional information
     notes = models.TextField(blank=True, null=True, help_text="Additional notes about the application")
     # Follow-up response tracking
@@ -193,7 +199,7 @@ class Notification(models.Model):
     
     # Core notification fields
     user = models.ForeignKey(User, on_delete=models.CASCADE, help_text="User who receives this notification")
-    job_application = models.ForeignKey(JobApplication, on_delete=models.CASCADE, help_text="Job application related to this notification")
+    job_application = models.ForeignKey(JobApplication, on_delete=models.CASCADE, help_text="Job application related to this notification", null=True, blank=True)
     title = models.CharField(max_length=200, help_text="Notification title")
     message = models.TextField(help_text="Notification message content")
     

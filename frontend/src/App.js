@@ -16,6 +16,7 @@ import NotificationsPage from './pages/NotificationsPage';
 import ResponsesPage from './pages/ResponsesPage'; 
 import Login from './pages/Login';
 import ResumeTemplate from './pages/ResumeTemplate';
+import GmailMessages from './components/GmailMessages'
 import MatchAnalysis from './pages/MatchAnalysis';
 
 /**
@@ -55,6 +56,8 @@ function App() {
               <Route path="/notifications" element={<NotificationsPage />} />
               
               <Route path="/responses" element={<ResponsesPage />} />
+
+              <Route path="/gmail" element={<GmailMessages />} /> 
             </Routes>
           </div>
         </div>
