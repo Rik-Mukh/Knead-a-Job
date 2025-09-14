@@ -138,7 +138,7 @@ class ResumeTemplate(models.Model):
             return existing
         return super().save(*args, **kwargs)
       
-          @classmethod
+    @classmethod
     def get_or_create_template(cls):
         """
         Get the existing template or create a new one if none exists.

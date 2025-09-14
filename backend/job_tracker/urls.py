@@ -9,7 +9,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
 from .views import (
-    JobApplicationViewSet, ResumeTemplateViewSet, MeetingNoteViewSet, UserViewSet
+    JobApplicationViewSet, ResumeTemplateViewSet, MeetingNoteViewSet, UserViewSet,
     ExperienceViewSet, ProjectViewSet, EducationViewSet, NotificationViewSet
 )
 

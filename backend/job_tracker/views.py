@@ -16,7 +16,7 @@ from django.db import models
 from django.utils import timezone
 from datetime import timedelta
 from .serializers import (
-    JobApplicationSerializer, ResumeTemplateSerializer, JobApplicationListSerializer, JobApplicationDetailSerializer, UserSerializer,
+    JobApplicationListSerializer, ResumeTemplateSerializer, JobApplicationListSerializer, JobApplicationDetailSerializer, UserSerializer,
     ResumeTemplateCreateSerializer, ExperienceSerializer, ProjectSerializer, EducationSerializer, MeetingNoteSerializer, NotificationSerializer
 )
 
