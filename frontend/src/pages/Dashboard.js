@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Timeline from "../components/Timeline"; 
 import { applicationService } from "../services/applicationService";
 import { resumeService } from "../services/resumeService";
@@ -89,6 +90,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({ applied: 0, interviews: 0, rejected: 0, offers: 0 });
   const [selectedApp, setSelectedApp] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -212,7 +214,7 @@ const Dashboard = () => {
                 </td>
               </tr>
             )}
-            {recentApplications.map(app => (
+            {recentApplications.map((app, idx) => (
               <tr key={app.id || app.company_name + app.applied_date}>
                 <td style={{fontWeight: "700", color: "#03a5fc"}}>{app.company_name}</td>
                 <td>{app.position}</td>
@@ -224,8 +226,15 @@ const Dashboard = () => {
                 </td>
                 <td><StatusBadge status={app.status} /></td>
                 <td>
-                  <a href={app.resume_url || "#"} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}>
-                    {app.resume_file || "Resume.pdf"}
+                  <a
+                    href="/resume-template"
+                    onClick={e => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      navigate("/resume-template");
+                    }}
+                  >
+                    {`resumev${idx + 1}.pdf`}
                   </a>
                 </td>
               </tr>
