@@ -159,6 +159,12 @@ CSRF_TRUSTED_ORIGINS = [
     "http://172.28.94.104:3000"
 ]
 
+# Add these lines 
+CSRF_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_SECURE = False  # Set to True in production with HTTPS
+SESSION_COOKIE_SECURE = False  # Set to True in production with HTTPS
+
 # REST Framework settings
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
