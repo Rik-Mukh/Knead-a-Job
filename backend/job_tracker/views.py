@@ -666,6 +666,8 @@ Please write a compelling project description that:
 3. Emphasizes the developer's role and contributions
 4. Uses action-oriented language
 5. Is concise but informative (2-3 sentences)
+6. Start with a strong action verb or phrase
+7. Use bullet points for the description
 
 If there's an existing description, use it as a base and enhance it. If not, create a new description from scratch.
 
@@ -754,6 +756,8 @@ Please enhance the existing description by:
 3. Using strong action verbs
 4. Making it more compelling for employers
 5. Maintaining the original content but making it more polished
+6. Start with a strong action verb or phrase
+7. Use bullet points for the description
 
 Return only the enhanced description text, no additional formatting or explanations."""
 
