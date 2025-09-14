@@ -193,7 +193,7 @@ class Notification(models.Model):
     
     # Core notification fields
     user = models.ForeignKey(User, on_delete=models.CASCADE, help_text="User who receives this notification")
-    job_application = models.ForeignKey(JobApplication, on_delete=models.CASCADE, help_text="Job application related to this notification")
+    job_application = models.ForeignKey(JobApplication, on_delete=models.CASCADE, help_text="Job application related to this notification", null=True, blank=True)
     title = models.CharField(max_length=200, help_text="Notification title")
     message = models.TextField(help_text="Notification message content")
     
