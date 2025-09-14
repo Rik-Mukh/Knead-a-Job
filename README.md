@@ -8,6 +8,7 @@ A full-stack web application for tracking job applications and managing resumes,
 - **Resume Management**: Upload, store, and manage multiple resume versions
 - **Dashboard**: Overview of application statistics and recent activity
 - **Status Tracking**: Track applications through different stages (Applied, Interview, Rejected, Accepted, Withdrawn)
+- **AI-Assisted Match Analysis**: Compute resume–job description compatibility scores using TF-IDF cosine similarity  
 - **Responsive Design**: Modern, mobile-friendly interface
 
 ## Project Structure
