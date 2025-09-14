@@ -48,19 +48,19 @@ const ResponsesPage = () => {
   if (loading) {
     return (
       <div className="text-center">
-        <h1>Responses / Meeting Minutes</h1>
+        <h1 style={{font: "normal 500 2.5rem helvetica-neue-lt-pro"}}>Responses / Meeting Minutes</h1>
         <p>Loading...</p>
       </div>
     );
   }
 
   return (
-    <div>
+    <div style={{padding: "20px"}}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px',}}>
-        <h1>Responses / Meeting Minutes</h1>
+        <h1 style={{font: "normal 500 2.5rem helvetica-neue-lt-pro"}}>Responses / Meeting Minutes</h1>
         <button 
           onClick={fetchResponses}
-          className="btn btn-secondary"
+          className="btn btn-primary"
         >
           Refresh
         </button>
