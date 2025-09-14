@@ -23,7 +23,7 @@ code {
 }
 
 .btn {
-  padding: 16px 32px;
+  padding: 12px 24px;
   border: none;
   border-radius: 48px;
   cursor: pointer;
@@ -266,4 +266,72 @@ code {
 
 .avoid-break {
   page-break-inside: avoid;
+}
+
+.application-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  font-family: "helvetica-neue-lt-pro";
+  border-radius: 12px;
+  gap: 8px;
+  background-color: #fff;
+}
+
+.app-info-wrapper {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+}
+
+.app-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  height: fit-content;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.application-btn {
+  display: flex;
+  height: 30px;
+  padding: 8px 16px;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  border-radius: 4px;
+  border: none;
+  background-color: #f1f1f1;
+  color: black;
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.app-text {
+  color: #989898;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+}
+
+.app-status {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+}
+
+.app-button-wrapper {
+  display: flex;
+  width: 100%;
+  height: fit-content;
+  padding: 8px 16px;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+  box-sizing: border-box;
 }

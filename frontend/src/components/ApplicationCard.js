@@ -12,8 +12,32 @@ const ApplicationCard = ({ application, onEdit, onDelete, onTrack, onAddMeetingM
     }
   };
 
+  const onMouseOverBtn = (e) => {
+    e.target.style.backgroundColor ="#333"
+    e.target.style.color = "white"
+  }
+
+  const onMouseOutBtn = (e) => {
+    e.target.style.backgroundColor =""
+    e.target.style.color = ""
+  }
+
+  const onMouseOverBtn2 = (e) => {
+    e.target.style.backgroundColor ="#ff4c4c"
+  }
+
+  const onMouseOutBtn2 = (e) => {
+    e.target.style.backgroundColor ="#ff8b8b"
+  }
+
+  const dateOptions = {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  }
+
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString();
+    return new Date(dateString).toLocaleDateString('en-US', dateOptions);
   };
 
   const handleCardClick = () => {
@@ -23,87 +47,97 @@ const ApplicationCard = ({ application, onEdit, onDelete, onTrack, onAddMeetingM
   };
 
   return (
-    <div
-      className="card"
-      onClick={handleCardClick}
-      style={{
-        marginTop: '40px',
-        border: '1.5px solid black',
-        borderRadius: '24px',
-        padding: '24px',
-        backgroundColor: '#fff',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-        cursor: application.job_url ? 'pointer' : 'default',
-      }}
-    >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <div>
-          <h4 style={{ margin: '0 0 8px 0' }}>{application.position}</h4>
-          <p style={{ margin: '0 0 8px 0', color: '#666' }}>{application.company_name}</p>
-          {application.location && (
-            <p style={{ margin: '0 0 8px 0', color: '#666' }}>📍 {application.location}</p>
-          )}
-          {application.salary_range && (
-            <p style={{ margin: '0 0 8px 0', color: '#666' }}>💰 {application.salary_range}</p>
-          )}
+    <div 
+    className="application-card" 
+    onClick={handleCardClick}>
+      <div className="app-info-wrapper">
+        <div className="app-info">
+          <div className="app-text">
+            Applied on {formatDate(application.applied_date)}
+          </div>
+          <div className="app-text" style={{
+            color: "black",
+            fontSize: "20px",
+          }}>
+            {application.position} @ <span style={{
+              fontWeight: 700
+            }}>
+              {application.company_name}
+              </span>
+          </div>
+          <div className="app-text">
+            {application.location}
+          </div>
+          <div className="app-text" style={{
+            fontWeight: "500",
+          }}>
+            {application.salary_range}
+          </div>
         </div>
-        <div style={{ textAlign: 'right' }}>
-          <span
-            style={{
-              backgroundColor: getStatusColor(application.status),
-              padding: '4px 8px',
-              borderRadius: '12px',
-              fontSize: '12px',
-              color: '#000000',
-              textTransform: 'capitalize'
-            }}
-          >
-            {application.status}
-          </span>
-          <p style={{ margin: '8px 0 0 0', fontSize: '14px', color: '#666' }}>
-            Applied: {formatDate(application.applied_date)}
-          </p>
+        <div className="app-info" style={{
+          alignItems: "flex-end",
+          width: "fit-content",
+        }}>
+          <div className="app-status app-text" style={{
+            backgroundColor: getStatusColor(application.status),
+            color: "black",
+            borderRadius: "8px"
+          }}>
+            {(application.status).charAt(0).toUpperCase() + (application.status).slice(1)}
+          </div>
         </div>
       </div>
-
-      {application.notes && (
-        <div style={{ marginTop: '12px' }}>
-          <p style={{ margin: '0', fontSize: '14px' }}>{application.notes}</p>
-        </div>
-      )}
-
-      <div style={{ marginTop: '16px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-        <button
-          onClick={(e) => { e.stopPropagation(); onEdit(application); }}
-          className="btn btn-secondary"
-          style={{ padding: '6px 12px', fontSize: '12px' }}
-        >
-          Edit
-        </button>
-        <button
-          onClick={(e) => { e.stopPropagation(); onDelete(application.id); }}
-          className="btn btn-danger"
-          style={{ padding: '6px 12px', fontSize: '12px' }}
-        >
-          Delete
-        </button>
-        <button
-          onClick={(e) => { e.stopPropagation(); onAddMeetingMinutes(application); }}
-          className="btn btn-info"
-          style={{ padding: '6px 12px', fontSize: '12px' }}
-        >
-          Add Meeting Minutes
-        </button>
-        <button
+      <div className="notes wrapper" style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: "8px",
+        width: "100%"
+      }}>
+        <div className = "app-notes app-text" style={{
+          color: "black",
+          padding: "0px 16px 0px 16px",
+          fontSize: "14px",
+        }}>{application.notes}</div>
+        <div className="app-button-wrapper">
+          <button 
+          className="application-btn"
           onClick={(e) => { e.stopPropagation(); onTrack(application); }}
-          className="btn btn-outline-primary"
-          style={{ padding: '6px 12px', fontSize: '12px' }}
-        >
-          Track Response
-        </button>
+          onMouseOver={onMouseOverBtn}
+          onMouseOut={onMouseOutBtn}>
+            Track Responses
+          </button>
+          <button 
+          className="application-btn"
+          onClick={(e) => { e.stopPropagation(); onAddMeetingMinutes(application); }}
+          onMouseOver={onMouseOverBtn}
+          onMouseOut={onMouseOutBtn}>
+            Add Minutes
+          </button>
+          <button 
+          className="application-btn" 
+          style={{
+            backgroundColor: "white",
+            border: "1px solid black"
+          }}
+          onClick={(e) => { e.stopPropagation(); onEdit(application); }}
+          onMouseOver={onMouseOverBtn}
+          onMouseOut={onMouseOutBtn}>
+            Edit
+          </button>
+          <button 
+          className="application-btn" 
+          style={{
+            backgroundColor: "#ff8b8b"
+          }}
+          onClick={(e) => { e.stopPropagation(); onDelete(application); }}
+          onMouseOver={onMouseOverBtn2}
+          onMouseOut={onMouseOutBtn2}>
+            Delete
+          </button>
+        </div>
       </div>
     </div>
-  );
+  )
 };
 
 export default ApplicationCard;
