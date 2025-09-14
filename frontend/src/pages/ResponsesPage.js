@@ -42,7 +42,11 @@ const ResponsesPage = () => {
   };
 
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString();
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: "numeric",
+      month: "long",
+      day: "numeric"
+    });
   };
 
   if (loading) {
@@ -69,15 +73,20 @@ const ResponsesPage = () => {
       {responses.length > 0 ? (
         <div className="grid grid-1" >
           {responses.map((note) => (
-            <div key={note.id} className="card" style={{ marginBottom: '20px', border: '1.5px solid black',boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+            <div key={note.id} className="card" style={{ marginBottom: '20px', border: 'none',boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '15px', }}>
                 <div>
-                  <h3 style={{ margin: '0 0 8px 0' }}>{note.application.position} at {note.application.company_name}</h3>
+                  <h3 style={{ 
+                    margin: '0 0 8px 0', 
+                    fontWeight: "500",
+                    fontSize: "1.5rem",
+                    color: "black",}}
+                      className="app-text">
+                    {note.application.position} @  
+                    <span style={{fontWeight: "700", color: '#03a5fc'}}> {note.application.company_name}</span>
+                    </h3>
                   <p style={{ margin: '0', color: '#666' }}>
-                    Applied: {formatDate(note.application.applied_date)}
-                  </p>
-                  <p style={{ margin: '0', color: '#666', fontSize: '14px' }}>
-                    Note added: {formatDate(note.created_at)}
+                    Applied on {formatDate(note.application.applied_date)}
                   </p>
                 </div>
                 <span
@@ -109,6 +118,11 @@ const ResponsesPage = () => {
                   {note.content}
                 </p>
               </div>
+
+              <p style={{ width: "100%", alignContent: 'flex-end', margin: '0', color: '#666', fontSize: '16px' }}>
+                    {formatDate(note.created_at)}
+              </p>
+
             </div>
           ))}
         </div>

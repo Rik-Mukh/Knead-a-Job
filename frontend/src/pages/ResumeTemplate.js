@@ -385,7 +385,7 @@ const ResumeTemplate = () => {
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-        <h2>Resume Template</h2>
+        <h2 style={{font: "normal 500 2.5rem helvetica-neue-lt-pro"}}>Resume Template</h2>
         <button 
           className="btn btn-primary" 
           onClick={handleSaveTemplate}
@@ -405,7 +405,7 @@ const ResumeTemplate = () => {
               onClick={() => setActiveTab(tab)}
               style={{ 
                 marginRight: '8px', 
-                borderRadius: '4px 4px 0 0',
+                borderRadius: '4px 4px 4px 4px',
                 borderBottom: activeTab === tab ? 'none' : '1px solid #ddd'
                 
               }}
@@ -420,7 +420,7 @@ const ResumeTemplate = () => {
       {activeTab === 'resume-preview' && (
         <div className="card" style={{
             marginTop: '40px',
-            border: '1.5px solid black',
+            border: 'none',
             borderRadius: '24px',
             padding: '24px',
             backgroundColor: '#fff',
@@ -538,7 +538,7 @@ const ResumeTemplate = () => {
       {activeTab === 'personal' && (
         <div className="card" style={{
             marginTop: '40px',
-            border: '1.5px solid black',
+            border: 'none',
             borderRadius: '24px',
             padding: '24px',
             backgroundColor: '#fff',
@@ -632,7 +632,7 @@ const ResumeTemplate = () => {
         <div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px',
             marginTop: '40px',
-            border: '1.5px solid black',
+            border: 'none',
             borderRadius: '24px',
             padding: '24px',
             backgroundColor: '#fff',
@@ -645,7 +645,7 @@ const ResumeTemplate = () => {
           </div>
           {(experiences || []).map((exp, index) => (
             <div key={index} className="card" style={{ marginBottom: '16px',  marginTop: '40px',
-            border: '1.5px solid black',
+            border: 'none',
             borderRadius: '24px',
             padding: '24px',
             backgroundColor: '#fff',
@@ -738,7 +738,7 @@ const ResumeTemplate = () => {
           {experiences.length === 0 && (
             <div className="card text-center" style={{
             marginTop: '40px',
-            border: '1.5px solid black',
+            border: 'none',
             borderRadius: '24px',
             padding: '24px',
             backgroundColor: '#fff',
@@ -756,7 +756,7 @@ const ResumeTemplate = () => {
         <div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' , marginBottom: '16px',
             marginTop: '40px',
-            border: '1.5px solid black',
+            border: 'none',
             borderRadius: '24px',
             padding: '24px',
             backgroundColor: '#fff',
@@ -769,7 +769,7 @@ const ResumeTemplate = () => {
           {(projects || []).map((project, index) => (
             <div key={index} className="card" style={{ marginBottom: '16px',
             marginTop: '40px',
-            border: '1.5px solid black',
+            border: 'none',
             borderRadius: '24px',
             padding: '24px',
             backgroundColor: '#fff',
@@ -865,7 +865,7 @@ const ResumeTemplate = () => {
           {projects.length === 0 && (
             <div className="card text-center" style={{
             marginTop: '40px',
-            border: '1.5px solid black',
+            border: 'none',
             borderRadius: '24px',
             padding: '24px',
             backgroundColor: '#fff',
@@ -882,7 +882,7 @@ const ResumeTemplate = () => {
         <div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' , arginBottom: '16px',
             marginTop: '40px',
-            border: '1.5px solid black',
+            border: 'none',
             borderRadius: '24px',
             padding: '24px',
             backgroundColor: '#fff',
@@ -895,7 +895,7 @@ const ResumeTemplate = () => {
           {(educations || []).map((edu, index) => (
             <div key={index} className="card" style={{ marginBottom: '16px' , marginBottom: '16px',
             marginTop: '40px',
-            border: '1.5px solid black',
+            border: 'none',
             borderRadius: '24px',
             padding: '24px',
             backgroundColor: '#fff',
@@ -999,7 +999,7 @@ const ResumeTemplate = () => {
           {educations.length === 0 && (
             <div className="card text-center" style={{
             marginTop: '40px',
-            border: '1.5px solid black',
+            border: 'none',
             borderRadius: '24px',
             padding: '24px',
             backgroundColor: '#fff',
