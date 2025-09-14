@@ -35,7 +35,7 @@ class JobApplicationListSerializer(serializers.ModelSerializer):
     class Meta:
         model = JobApplication
         exclude = ['meeting_minutes']  # assuming this is a field you added
-        read_only_fields = ('user', 'created_at', 'updated_at')
+        read_only_fields = ('user', 'created_at', 'updated_at', 'interview_date', 'rejected_date', 'accepted_date', 'withdrawn_date')
 
     def create(self, validated_data):
         # Automatically assign the user from the request context
@@ -53,11 +53,13 @@ class JobApplicationListSerializer(serializers.ModelSerializer):
 
 class JobApplicationDetailSerializer(serializers.ModelSerializer):
     meetingnote_set = MeetingNoteSerializer(many=True, read_only=True)
+    # Accept client-provided timestamp for status changes (write-only)
+    client_event_timestamp = serializers.DateTimeField(write_only=True, required=False)
 
     class Meta:
         model = JobApplication
         fields = '__all__'
-        read_only_fields = ('user', 'created_at', 'updated_at')
+        read_only_fields = ('user', 'created_at', 'updated_at', 'interview_date', 'rejected_date', 'accepted_date', 'withdrawn_date')
 
     def create(self, validated_data):
         # Automatically assign the user from the request context
