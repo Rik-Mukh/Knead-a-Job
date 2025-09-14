@@ -53,12 +53,12 @@ const Navbar = () => {
           </li>
           <li>
             <Link 
-              to="/resumes"
+              to="/resume-template"
               style={{ 
-                color: isActive('/resumes') ? '#007bff' : '#000', 
+                color: isActive('/resume-template') ? '#007bff' : '#000', 
                 textDecoration: 'none',
                 fontFamily: 'helvetica-neue-lt-pro',
-                fontWeight: isActive('/resumes') ? 'bold' : 'normal'
+                fontWeight: isActive('/resume-template') ? 'bold' : 'normal'
               }}
             >
               Resumes
