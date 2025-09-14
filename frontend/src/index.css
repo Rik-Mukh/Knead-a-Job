@@ -310,9 +310,9 @@ h3 {
   justify-content: center;
   align-items: center;
   gap: 10px;
-  border-radius: 4px;
+  border-radius: 16px;
   border: none;
-  background-color: #f1f1f1;
+  background-color: #f5f5f5;
   color: black;
   font-size: 10px;
   font-weight: 500;
@@ -341,4 +341,5 @@ h3 {
   align-items: center;
   gap: 8px;
   box-sizing: border-box;
+  transition: height 300ms ease;
 }

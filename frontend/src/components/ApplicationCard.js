@@ -12,6 +12,20 @@ const ApplicationCard = ({ application, onEdit, onDelete, onTrack, onAddMeetingM
     }
   };
 
+  const showOpts = (e) => {
+    const card = e.target.closest(".application-card");
+    const wrapper = card.querySelector(".app-button-wrapper")
+    wrapper.style.visibility="visible";
+    wrapper.style.height="48px"
+  }
+
+  const hideOpts = (e) => {
+    const card = e.target.closest(".application-card");
+    const wrapper = card.querySelector(".app-button-wrapper")
+    wrapper.style.visibility="hidden";
+    wrapper.style.height="0px"
+  }
+
   const onMouseOverBtn = (e) => {
     e.target.style.backgroundColor ="#333"
     e.target.style.color = "white"
@@ -49,7 +63,9 @@ const ApplicationCard = ({ application, onEdit, onDelete, onTrack, onAddMeetingM
   return (
     <div 
     className="application-card" 
-    onClick={handleCardClick}>
+    onClick={handleCardClick}
+    onMouseOver={showOpts}
+    onMouseOut={hideOpts}>
       <div className="app-info-wrapper">
         <div className="app-info">
           <div className="app-text">
@@ -91,7 +107,7 @@ const ApplicationCard = ({ application, onEdit, onDelete, onTrack, onAddMeetingM
       <div className="notes wrapper" style={{
         display: "flex",
         flexDirection: "column",
-        gap: "8px",
+        gap: "4px",
         width: "100%"
       }}>
         <div className = "app-notes app-text" style={{
@@ -99,7 +115,12 @@ const ApplicationCard = ({ application, onEdit, onDelete, onTrack, onAddMeetingM
           padding: "0px 16px 0px 16px",
           fontSize: "14px",
         }}>{application.notes}</div>
-        <div className="app-button-wrapper">
+        <div 
+          className="app-button-wrapper"
+          style={{
+            visibility: "hidden",
+            height: 0
+          }}>
           <button 
           className="application-btn"
           onClick={(e) => { e.stopPropagation(); onTrack(application); }}
@@ -116,10 +137,6 @@ const ApplicationCard = ({ application, onEdit, onDelete, onTrack, onAddMeetingM
           </button>
           <button 
           className="application-btn" 
-          style={{
-            backgroundColor: "white",
-            border: "1px solid black"
-          }}
           onClick={(e) => { e.stopPropagation(); onEdit(application); }}
           onMouseOver={onMouseOverBtn}
           onMouseOut={onMouseOutBtn}>
