@@ -240,43 +240,6 @@ class ResumeTemplateViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
     
-class MeetingNoteViewSet(viewsets.ModelViewSet):
-    """
-    ViewSet for MeetingNote model.
-    
-    Provides CRUD operations for meeting notes.
-    Users can only access their own meeting notes.
-    """
-    serializer_class = MeetingNoteSerializer
-    permission_classes = [permissions.AllowAny]  # Allow unauthenticated access for development
-
-    def get_queryset(self):
-        """
-        Return meeting notes filtered by job application if specified.
-        
-        Returns:
-            QuerySet: Filtered queryset of meeting notes
-        """
-        # For now, return all meeting notes since we're using AllowAny permissions
-        # TODO: Filter by user when authentication is implemented
-        queryset = MeetingNote.objects.all()
-        application_id = self.kwargs.get('application_id')
-        if application_id:
-            queryset = queryset.filter(job_application_id=application_id)
-        return queryset
-
-    def perform_create(self, serializer):
-        """
-        Override create to validate the job application exists.
-        """
-        # Get the job_application from the validated data
-        job_application = serializer.validated_data.get('job_application')
-        if job_application:
-            # job_application is already a JobApplication instance from the serializer
-            serializer.save()
-        else:
-            raise serializers.ValidationError("Job application is required")
-            
     def retrieve(self, request, *args, **kwargs):
         """
         Get the resume template by ID (always returns the single template).
@@ -425,6 +388,43 @@ class MeetingNoteViewSet(viewsets.ModelViewSet):
 """
         
         return markdown
+    
+class MeetingNoteViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet for MeetingNote model.
+    
+    Provides CRUD operations for meeting notes.
+    Users can only access their own meeting notes.
+    """
+    serializer_class = MeetingNoteSerializer
+    permission_classes = [permissions.AllowAny]  # Allow unauthenticated access for development
+
+    def get_queryset(self):
+        """
+        Return meeting notes filtered by job application if specified.
+        
+        Returns:
+            QuerySet: Filtered queryset of meeting notes
+        """
+        # For now, return all meeting notes since we're using AllowAny permissions
+        # TODO: Filter by user when authentication is implemented
+        queryset = MeetingNote.objects.all()
+        application_id = self.kwargs.get('application_id')
+        if application_id:
+            queryset = queryset.filter(job_application_id=application_id)
+        return queryset
+
+    def perform_create(self, serializer):
+        """
+        Override create to validate the job application exists.
+        """
+        # Get the job_application from the validated data
+        job_application = serializer.validated_data.get('job_application')
+        if job_application:
+            # job_application is already a JobApplication instance from the serializer
+            serializer.save()
+        else:
+            raise serializers.ValidationError("Job application is required")
 
 
 class NotificationViewSet(viewsets.ModelViewSet):
