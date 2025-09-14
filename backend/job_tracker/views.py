@@ -324,6 +324,25 @@ class ResumeTemplateViewSet(viewsets.ModelViewSet):
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
+    @action(detail=False, methods=['get'])
+    def generate_fresh(self, request):
+        """Generate resume Markdown from database data, ignoring custom markdown."""
+        try:
+            # Get template data
+            template = ResumeTemplate.get_or_create_template()
+            
+            # Get all related data
+            experiences = Experience.objects.all().order_by('-start_date')
+            projects = Project.objects.all().order_by('-start_date')
+            educations = Education.objects.all().order_by('-start_date')
+            
+            # Generate Markdown from database data only
+            markdown = self._generate_resume_markdown(template, experiences, projects, educations)
+            
+            return Response({'markdown': markdown})
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
     def _generate_resume_markdown(self, template, experiences, projects, educations):
         """Generate Markdown from resume data."""
         # Format experiences

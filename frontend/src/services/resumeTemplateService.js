@@ -341,6 +341,23 @@ class ResumeTemplateService {
 
     return await response.json();
   }
+
+  async generateFreshResume() {
+    const response = await fetch(`${API_BASE_URL}/resume-template/generate_fresh/`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+    }
+
+    return await response.json();
+  }
 }
 
 export const resumeTemplateService = new ResumeTemplateService();
