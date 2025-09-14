@@ -16,7 +16,7 @@ from django.db import models
 from django.utils import timezone
 from datetime import timedelta
 from .serializers import (
-    JobApplicationListSerializer, ResumeTemplateSerializer, JobApplicationListSerializer, JobApplicationDetailSerializer, UserSerializer,
+    ResumeTemplateSerializer, JobApplicationListSerializer, JobApplicationDetailSerializer, UserSerializer,
     ResumeTemplateCreateSerializer, ExperienceSerializer, ProjectSerializer, EducationSerializer, MeetingNoteSerializer, NotificationSerializer
 )
 
@@ -240,43 +240,6 @@ class ResumeTemplateViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
     
-class MeetingNoteViewSet(viewsets.ModelViewSet):
-    """
-    ViewSet for MeetingNote model.
-    
-    Provides CRUD operations for meeting notes.
-    Users can only access their own meeting notes.
-    """
-    serializer_class = MeetingNoteSerializer
-    permission_classes = [permissions.AllowAny]  # Allow unauthenticated access for development
-
-    def get_queryset(self):
-        """
-        Return meeting notes filtered by job application if specified.
-        
-        Returns:
-            QuerySet: Filtered queryset of meeting notes
-        """
-        # For now, return all meeting notes since we're using AllowAny permissions
-        # TODO: Filter by user when authentication is implemented
-        queryset = MeetingNote.objects.all()
-        application_id = self.kwargs.get('application_id')
-        if application_id:
-            queryset = queryset.filter(job_application_id=application_id)
-        return queryset
-
-    def perform_create(self, serializer):
-        """
-        Override create to validate the job application exists.
-        """
-        # Get the job_application from the validated data
-        job_application = serializer.validated_data.get('job_application')
-        if job_application:
-            # job_application is already a JobApplication instance from the serializer
-            serializer.save()
-        else:
-            raise serializers.ValidationError("Job application is required")
-            
     def retrieve(self, request, *args, **kwargs):
         """
         Get the resume template by ID (always returns the single template).
@@ -361,6 +324,25 @@ class MeetingNoteViewSet(viewsets.ModelViewSet):
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
+    @action(detail=False, methods=['get'])
+    def generate_fresh(self, request):
+        """Generate resume Markdown from database data, ignoring custom markdown."""
+        try:
+            # Get template data
+            template = ResumeTemplate.get_or_create_template()
+            
+            # Get all related data
+            experiences = Experience.objects.all().order_by('-start_date')
+            projects = Project.objects.all().order_by('-start_date')
+            educations = Education.objects.all().order_by('-start_date')
+            
+            # Generate Markdown from database data only
+            markdown = self._generate_resume_markdown(template, experiences, projects, educations)
+            
+            return Response({'markdown': markdown})
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
     def _generate_resume_markdown(self, template, experiences, projects, educations):
         """Generate Markdown from resume data."""
         # Format experiences
@@ -425,6 +407,43 @@ class MeetingNoteViewSet(viewsets.ModelViewSet):
 """
         
         return markdown
+    
+class MeetingNoteViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet for MeetingNote model.
+    
+    Provides CRUD operations for meeting notes.
+    Users can only access their own meeting notes.
+    """
+    serializer_class = MeetingNoteSerializer
+    permission_classes = [permissions.AllowAny]  # Allow unauthenticated access for development
+
+    def get_queryset(self):
+        """
+        Return meeting notes filtered by job application if specified.
+        
+        Returns:
+            QuerySet: Filtered queryset of meeting notes
+        """
+        # For now, return all meeting notes since we're using AllowAny permissions
+        # TODO: Filter by user when authentication is implemented
+        queryset = MeetingNote.objects.all()
+        application_id = self.kwargs.get('application_id')
+        if application_id:
+            queryset = queryset.filter(job_application_id=application_id)
+        return queryset
+
+    def perform_create(self, serializer):
+        """
+        Override create to validate the job application exists.
+        """
+        # Get the job_application from the validated data
+        job_application = serializer.validated_data.get('job_application')
+        if job_application:
+            # job_application is already a JobApplication instance from the serializer
+            serializer.save()
+        else:
+            raise serializers.ValidationError("Job application is required")
 
 
 class NotificationViewSet(viewsets.ModelViewSet):
@@ -543,8 +562,23 @@ class ProjectViewSet(viewsets.ModelViewSet):
         """Return all projects - no template filtering needed."""
         return Project.objects.all()
     
+    def create(self, request, *args, **kwargs):
+        """Create a new project with debug logging."""
+        print(f"DEBUG: ProjectViewSet.create called")
+        print(f"DEBUG: Request data: {request.data}")
+        print(f"DEBUG: Request method: {request.method}")
+        print(f"DEBUG: Content type: {request.content_type}")
+        
+        try:
+            return super().create(request, *args, **kwargs)
+        except Exception as e:
+            print(f"DEBUG: Exception in create: {e}")
+            print(f"DEBUG: Exception type: {type(e)}")
+            raise
+    
     def perform_create(self, serializer):
         """Create a new project entry - no template linking needed."""
+        print(f"DEBUG: perform_create called with serializer data: {serializer.validated_data}")
         serializer.save()
 
 

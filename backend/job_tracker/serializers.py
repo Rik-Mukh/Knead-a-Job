@@ -192,6 +192,47 @@ class ProjectSerializer(serializers.ModelSerializer):
         model = Project
         fields = '__all__'
         read_only_fields = ('created_at', 'updated_at')
+    
+    def to_internal_value(self, data):
+        """Convert empty strings to None for optional fields."""
+        print(f"DEBUG: ProjectSerializer.to_internal_value called with data: {data}")
+        data = dict(data) if data is not None else {}
+        
+        # Convert empty strings to None for optional fields
+        if data.get('technologies', '') == '':
+            data['technologies'] = None
+        if data.get('url', '') == '':
+            data['url'] = None
+        if data.get('end_date', '') == '':
+            data['end_date'] = None
+            
+        print(f"DEBUG: ProjectSerializer.to_internal_value processed data: {data}")
+        result = super().to_internal_value(data)
+        print(f"DEBUG: ProjectSerializer.to_internal_value result: {result}")
+        return result
+    
+    def validate(self, attrs):
+        """Validate project data."""
+        print(f"DEBUG: ProjectSerializer.validate called with attrs: {attrs}")
+        start_date = attrs.get('start_date')
+        end_date = attrs.get('end_date')
+        is_ongoing = attrs.get('is_ongoing', False)
+        
+        print(f"DEBUG: start_date: {start_date}, end_date: {end_date}, is_ongoing: {is_ongoing}")
+        
+        # If project is ongoing, force end_date to None
+        if is_ongoing:
+            attrs['end_date'] = None
+        else:
+            # If not ongoing and end_date is provided, validate it's after start_date
+            if start_date and end_date and end_date < start_date:
+                print(f"DEBUG: Validation error - end_date before start_date")
+                raise serializers.ValidationError({
+                    'end_date': 'End date cannot be before start date.'
+                })
+                
+        print(f"DEBUG: ProjectSerializer.validate final attrs: {attrs}")
+        return attrs
 
 
 class EducationSerializer(serializers.ModelSerializer):

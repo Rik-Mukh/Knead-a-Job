@@ -153,14 +153,15 @@ const ResumeTemplate = () => {
 
   const revertToGenerated = async () => {
     try {
-      const response = await resumeTemplateService.generateResume();
+      // Use generateFreshResume to get content from database, not custom markdown
+      const response = await resumeTemplateService.generateFreshResume();
       setResumeMarkdown(response.markdown);
       setCustomMarkdown(response.markdown);
       
       const html = marked(response.markdown, { breaks: true });
       setResumeHtml(html);
       
-      alert('Reverted to auto-generated resume');
+      alert('Reverted to auto-generated resume from database');
     } catch (error) {
       console.error('Error reverting resume:', error);
       alert('Error reverting resume: ' + error.message);
@@ -405,6 +406,7 @@ const ResumeTemplate = () => {
                 marginRight: '8px', 
                 borderRadius: '4px 4px 0 0',
                 borderBottom: activeTab === tab ? 'none' : '1px solid #ddd'
+                
               }}
             >
               {tab.charAt(0).toUpperCase() + tab.slice(1)}
@@ -415,7 +417,14 @@ const ResumeTemplate = () => {
 
       {/* Resume Preview Tab */}
       {activeTab === 'resume-preview' && (
-        <div className="card">
+        <div className="card" style={{
+            marginTop: '40px',
+            border: '1.5px solid black',
+            borderRadius: '24px',
+            padding: '24px',
+            backgroundColor: '#fff',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+          }}>
           <div className="d-flex justify-content-between align-items-center mb-3">
             <h3>Resume Preview</h3>
             <div>
@@ -526,7 +535,14 @@ const ResumeTemplate = () => {
 
       {/* Personal Information Tab */}
       {activeTab === 'personal' && (
-        <div className="card">
+        <div className="card" style={{
+            marginTop: '40px',
+            border: '1.5px solid black',
+            borderRadius: '24px',
+            padding: '24px',
+            backgroundColor: '#fff',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+          }}>
           <h3>Personal Information</h3>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
             <div>
@@ -613,15 +629,27 @@ const ResumeTemplate = () => {
       {/* Experience Tab */}
       {activeTab === 'experience' && (
         <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px',
+            marginTop: '40px',
+            border: '1.5px solid black',
+            borderRadius: '24px',
+            padding: '24px',
+            backgroundColor: '#fff',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+          }}>
             <h3>Work Experience</h3>
             <button className="btn btn-primary" onClick={handleAddExperience}>
               Add Experience
             </button>
           </div>
           {(experiences || []).map((exp, index) => (
-            <div key={index} className="card" style={{ marginBottom: '16px' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
+            <div key={index} className="card" style={{ marginBottom: '16px',  marginTop: '40px',
+            border: '1.5px solid black',
+            borderRadius: '24px',
+            padding: '24px',
+            backgroundColor: '#fff',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.1)', }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px',  }}>
                 <div>
                   <label>Company *</label>
                   <input
@@ -707,7 +735,15 @@ const ResumeTemplate = () => {
             </div>
           ))}
           {experiences.length === 0 && (
-            <div className="card text-center">
+            <div className="card text-center" style={{
+            marginTop: '40px',
+            border: '1.5px solid black',
+            borderRadius: '24px',
+            padding: '24px',
+            backgroundColor: '#fff',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+          }}
+          >
               <p>No work experience added yet. Click "Add Experience" to get started!</p>
             </div>
           )}
@@ -717,14 +753,27 @@ const ResumeTemplate = () => {
       {/* Projects Tab */}
       {activeTab === 'projects' && (
         <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' , marginBottom: '16px',
+            marginTop: '40px',
+            border: '1.5px solid black',
+            borderRadius: '24px',
+            padding: '24px',
+            backgroundColor: '#fff',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.1)'}}>
             <h3>Projects</h3>
             <button className="btn btn-primary" onClick={handleAddProject}>
               Add Project
             </button>
           </div>
           {(projects || []).map((project, index) => (
-            <div key={index} className="card" style={{ marginBottom: '16px' }}>
+            <div key={index} className="card" style={{ marginBottom: '16px',
+            marginTop: '40px',
+            border: '1.5px solid black',
+            borderRadius: '24px',
+            padding: '24px',
+            backgroundColor: '#fff',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+          }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
                 <div>
                   <label>Project Name *</label>
@@ -813,7 +862,14 @@ const ResumeTemplate = () => {
             </div>
           ))}
           {projects.length === 0 && (
-            <div className="card text-center">
+            <div className="card text-center" style={{
+            marginTop: '40px',
+            border: '1.5px solid black',
+            borderRadius: '24px',
+            padding: '24px',
+            backgroundColor: '#fff',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+          }}>
               <p>No projects added yet. Click "Add Project" to get started!</p>
             </div>
           )}
@@ -823,14 +879,26 @@ const ResumeTemplate = () => {
       {/* Education Tab */}
       {activeTab === 'education' && (
         <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' , arginBottom: '16px',
+            marginTop: '40px',
+            border: '1.5px solid black',
+            borderRadius: '24px',
+            padding: '24px',
+            backgroundColor: '#fff',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.1)'}}>
             <h3>Education</h3>
             <button className="btn btn-primary" onClick={handleAddEducation}>
               Add Education
             </button>
           </div>
           {(educations || []).map((edu, index) => (
-            <div key={index} className="card" style={{ marginBottom: '16px' }}>
+            <div key={index} className="card" style={{ marginBottom: '16px' , marginBottom: '16px',
+            marginTop: '40px',
+            border: '1.5px solid black',
+            borderRadius: '24px',
+            padding: '24px',
+            backgroundColor: '#fff',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.1)'}}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
                 <div>
                   <label>Institution *</label>
@@ -928,7 +996,14 @@ const ResumeTemplate = () => {
             </div>
           ))}
           {educations.length === 0 && (
-            <div className="card text-center">
+            <div className="card text-center" style={{
+            marginTop: '40px',
+            border: '1.5px solid black',
+            borderRadius: '24px',
+            padding: '24px',
+            backgroundColor: '#fff',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+          }}>
               <p>No education added yet. Click "Add Education" to get started!</p>
             </div>
           )}
