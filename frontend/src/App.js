@@ -42,6 +42,9 @@ function AppLayout() {
           <Route path="/resumes" element={<ResumeManager />} />
           <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/responses" element={<ResponsesPage />} />
+          <Route path="/resume-template" element={<ResumeTemplate />} />
+          <Route path="/gmail" element={<GmailMessages />} />
+          <Route path="/match-analysis" element={<MatchAnalysis />} />
         </Routes>
       </div>
     </div>
