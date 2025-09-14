@@ -119,7 +119,7 @@ const Dashboard = () => {
     try {
       const statsData = await applicationService.getStats();
       setStats({
-        applied: statsData.applied,
+        applied: statsData.total,
         interviews: statsData.interview,
         rejected: statsData.rejected,
         offers: statsData.accepted,
@@ -193,7 +193,7 @@ const Dashboard = () => {
       </section>
 
       {/* Applications Table */}
-      <div className="table-card" style={{ marginTop: "24px" }}>
+      <div className="table-card" style={{ marginTop: "24px", border: "none" }}>
         <table className="app-table" aria-label="Recent applications">
           <thead>
             <tr>
@@ -214,7 +214,7 @@ const Dashboard = () => {
             )}
             {recentApplications.map(app => (
               <tr key={app.id || app.company_name + app.applied_date}>
-                <td>{app.company_name}</td>
+                <td style={{fontWeight: "700", color: "#03a5fc"}}>{app.company_name}</td>
                 <td>{app.position}</td>
                 <td 
                   style={{ cursor: "default", color: "#000" }}

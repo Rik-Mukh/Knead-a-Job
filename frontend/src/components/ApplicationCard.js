@@ -60,7 +60,8 @@ const ApplicationCard = ({ application, onEdit, onDelete, onTrack, onAddMeetingM
             fontSize: "20px",
           }}>
             {application.position} @ <span style={{
-              fontWeight: 700
+              fontWeight: 700,
+              color: "#03a5fc"
             }}>
               {application.company_name}
               </span>

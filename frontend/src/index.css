@@ -12,6 +12,10 @@ code {
     monospace;
 }
 
+h3 {
+  font: 500 1.5rem helvetica-neue-lt-pro;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -87,6 +91,9 @@ code {
 }
 
 .card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
   background: white;
   border: 1px solid #ddd;
   border-radius: 8px;
