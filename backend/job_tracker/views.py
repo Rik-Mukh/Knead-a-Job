@@ -19,6 +19,9 @@ from .serializers import (
     ResumeTemplateSerializer, JobApplicationListSerializer, JobApplicationDetailSerializer, UserSerializer,
     ResumeTemplateCreateSerializer, ExperienceSerializer, ProjectSerializer, EducationSerializer, MeetingNoteSerializer, NotificationSerializer
 )
+import openai
+import os
+import json
 
 
 class JobApplicationViewSet(viewsets.ModelViewSet):
@@ -668,4 +671,253 @@ class EducationViewSet(viewsets.ModelViewSet):
 
 class IsAuthenticated(permissions.IsAuthenticated):
     pass
+
+
+# AI Content Generation Views
+@api_view(['POST'])
+@permission_classes([permissions.AllowAny])  # Allow unauthenticated for development
+def generate_project_description(request):
+    """
+    Generate a project description using AI based on project name, technologies, and existing description.
+    """
+    print(f"Project description request received: {request.data}")
+    try:
+        data = request.data
+        project_name = data.get('project_name', '')
+        technologies = data.get('technologies', '')
+        existing_description = data.get('existing_description', '')
+        
+        if not project_name:
+            return Response(
+                {'error': 'Project name is required'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Set up OpenAI client
+        api_key = os.getenv('OPENAI_API_KEY')
+        if not api_key:
+            raise ValueError('OPENAI_API_KEY environment variable is not set')
+        
+        print(f"Initializing OpenAI client with API key: {api_key[:10]}...")
+        try:
+            # Initialize client with minimal configuration to avoid conflicts
+            client = openai.OpenAI(
+                api_key=api_key,
+                timeout=30.0
+            )
+            print("OpenAI client initialized successfully")
+        except Exception as e:
+            print(f"Failed to initialize OpenAI client: {str(e)}")
+            raise ValueError(f'Failed to initialize OpenAI client: {str(e)}')
+        
+        # Build context for the prompt
+        context_parts = []
+        if project_name:
+            context_parts.append(f"Project name: {project_name}")
+        if technologies:
+            context_parts.append(f"Technologies used: {technologies}")
+        if existing_description:
+            context_parts.append(f"Current description: {existing_description}")
+        
+        context = "\n".join(context_parts)
+        
+        prompt = f"""Generate a professional project description for a resume based on the following information:
+
+{context}
+
+Please write a compelling project description that:
+1. Clearly explains what the project does
+2. Highlights the technologies used
+3. Emphasizes the developer's role and contributions
+4. Uses action-oriented language
+5. Is concise but informative (2-3 sentences)
+6. Start with a strong action verb or phrase
+7. Use bullet points for the description
+
+If there's an existing description, use it as a base and enhance it. If not, create a new description from scratch.
+
+Return only the description text, no additional formatting or explanations."""
+
+        print(f"Sending request to OpenAI with model: gpt-4o-mini")
+        print(f"Prompt length: {len(prompt)} characters")
+        
+        try:
+            response = client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[
+                    {"role": "system", "content": "You are a professional resume writer specializing in software development projects."},
+                    {"role": "user", "content": prompt}
+                ],
+                max_completion_tokens=200
+            )
+            print(f"OpenAI API response received: {response.choices[0].message.content[:100]}...")
+        except Exception as e:
+            print(f"OpenAI API call failed: {str(e)}")
+            raise e
+        
+        generated_description = response.choices[0].message.content.strip()
+        
+        print(f"Returning generated description: {generated_description[:100]}...")
+        return Response({
+            'generated_description': generated_description
+        })
+        
+    except Exception as e:
+        return Response(
+            {'error': f'Failed to generate project description: {str(e)}'}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+@api_view(['POST'])
+@permission_classes([permissions.AllowAny])  # Allow unauthenticated for development
+def generate_experience_summary(request):
+    """
+    Generate an experience summary using AI based on form data and existing description.
+    Requires at least 500 characters of existing content.
+    """
+    try:
+        data = request.data
+        company = data.get('company', '')
+        position = data.get('position', '')
+        existing_description = data.get('existing_description', '')
+        
+        # Validate minimum character requirement
+        if len(existing_description) < 500:
+            return Response(
+                {'error': 'Please provide at least 500 characters of existing experience description before generating AI content'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        if not company or not position:
+            return Response(
+                {'error': 'Company and position are required'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Set up OpenAI client
+        api_key = os.getenv('OPENAI_API_KEY')
+        if not api_key:
+            raise ValueError('OPENAI_API_KEY environment variable is not set')
+        
+        try:
+            # Initialize client with minimal configuration to avoid conflicts
+            client = openai.OpenAI(
+                api_key=api_key,
+                timeout=30.0
+            )
+        except Exception as e:
+            raise ValueError(f'Failed to initialize OpenAI client: {str(e)}')
+        
+        prompt = f"""Generate an enhanced professional experience description for a resume based on the following information:
+
+Company: {company}
+Position: {position}
+Current description: {existing_description}
+
+Please enhance the existing description by:
+1. Improving clarity and professional tone
+2. Adding quantifiable achievements where possible
+3. Using strong action verbs
+4. Making it more compelling for employers
+5. Maintaining the original content but making it more polished
+6. Start with a strong action verb or phrase
+7. Use bullet points for the description
+
+Return only the enhanced description text, no additional formatting or explanations."""
+
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": "You are a professional resume writer specializing in enhancing work experience descriptions."},
+                {"role": "user", "content": prompt}
+            ],
+            max_completion_tokens=300
+        )
+        
+        generated_description = response.choices[0].message.content.strip()
+        
+        return Response({
+            'generated_description': generated_description
+        })
+        
+    except Exception as e:
+        return Response(
+            {'error': f'Failed to generate experience summary: {str(e)}'}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+@api_view(['POST'])
+@permission_classes([permissions.AllowAny])  # Allow unauthenticated for development
+def generate_personal_summary(request):
+    """
+    Generate a personal summary using AI based on existing summary and user data.
+    """
+    try:
+        data = request.data
+        existing_summary = data.get('existing_summary', '')
+        name = data.get('name', '')
+        skills = data.get('skills', '')
+        
+        # Set up OpenAI client
+        api_key = os.getenv('OPENAI_API_KEY')
+        if not api_key:
+            raise ValueError('OPENAI_API_KEY environment variable is not set')
+        
+        try:
+            # Initialize client with minimal configuration to avoid conflicts
+            client = openai.OpenAI(
+                api_key=api_key,
+                timeout=30.0
+            )
+        except Exception as e:
+            raise ValueError(f'Failed to initialize OpenAI client: {str(e)}')
+        
+        # Build context for the prompt
+        context_parts = []
+        if name:
+            context_parts.append(f"Name: {name}")
+        if skills:
+            context_parts.append(f"Skills: {skills}")
+        if existing_summary:
+            context_parts.append(f"Current summary: {existing_summary}")
+        
+        context = "\n".join(context_parts) if context_parts else "No existing information provided"
+        
+        prompt = f"""Generate a professional summary for a resume based on the following information:
+
+{context}
+
+Please create or enhance a professional summary that:
+1. Highlights key skills and expertise
+2. Shows career focus and objectives
+3. Is concise (2-4 sentences)
+4. Uses professional language
+5. Appeals to potential employers
+
+If there's an existing summary, enhance it. If not, create a new one based on the provided information.
+
+Return only the summary text, no additional formatting or explanations."""
+
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": "You are a professional resume writer specializing in creating compelling professional summaries."},
+                {"role": "user", "content": prompt}
+            ],
+            max_completion_tokens=150
+        )
+        
+        generated_summary = response.choices[0].message.content.strip()
+        
+        return Response({
+            'generated_summary': generated_summary
+        })
+        
+    except Exception as e:
+        return Response(
+            {'error': f'Failed to generate personal summary: {str(e)}'}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
 
