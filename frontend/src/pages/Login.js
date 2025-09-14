@@ -1,5 +1,11 @@
 import React from 'react';
 
+  const handleGoogleLogin = () => {
+    // This will eventually redirect to your Google OAuth login
+    window.location.href = 'http://localhost:8000/accounts/google/login/?process=login&next=/auth-success/';
+  };
+
+
 const LogInButton = () => {
     return (
         <a className="log-in-btn" style={{
@@ -41,7 +47,9 @@ const SignUpButton = () => {
 
 const GoogleButton = () => {
     return (
-        <button className="google-sign-in" style={{
+        <button className="google-sign-in" 
+        onClick={handleGoogleLogin}
+        style={{
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -53,7 +61,8 @@ const GoogleButton = () => {
             borderRadius: "64px",
             border: "none",
             font: "normal 500 16px helvetica-neue-lt-pro",
-            gap: "12px"
+            gap: "12px",
+            cursor: "pointer",
         }}>
             <div>
                 Sign in with
