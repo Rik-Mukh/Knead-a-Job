@@ -120,10 +120,10 @@ class ExperienceSerializer(serializers.ModelSerializer):
                     "end_date": "End date is required unless this is your current position."
                 })
                 
-        if start and attrs.get("end_date") and attrs["end_date"] < start:
-            raise serializers.ValidationError({
-                "end_date": "End date cannot be before start date."
-            })
+            if start and attrs.get("end_date") and attrs["end_date"] < start:
+                raise serializers.ValidationError({
+                    "end_date": "End date cannot be before start date."
+                })
         return attrs
 
 

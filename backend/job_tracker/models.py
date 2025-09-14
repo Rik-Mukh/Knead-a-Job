@@ -137,7 +137,7 @@ class ResumeTemplate(models.Model):
             existing.save()
             return existing
         return super().save(*args, **kwargs)
-    
+      
     @classmethod
     def get_or_create_template(cls):
         """
