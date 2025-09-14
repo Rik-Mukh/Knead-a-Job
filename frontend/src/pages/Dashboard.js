@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import Timeline from "../components/Timeline"; 
 import { applicationService } from "../services/applicationService";
@@ -106,8 +106,6 @@ const Dashboard = () => {
         } catch {
           setDefaultResume(null);
         }
-
-        await updateStats();
       } catch (err) {
         console.error("Failed to fetch dashboard data", err);
       } finally {
@@ -117,7 +115,7 @@ const Dashboard = () => {
     fetchData();
   }, []);
 
-  const updateStats = async () => {
+  const updateStats = useCallback(async () => {
     try {
       const statsData = await applicationService.getStats();
       setStats({
@@ -136,7 +134,11 @@ const Dashboard = () => {
       };
       setStats(fallbackStats);
     }
-  };
+  }, [recentApplications]);
+
+  useEffect(() => {
+    updateStats();
+  }, [updateStats]);
 
   const hasOffer = recentApplications.some(app => ["offer", "accepted"].includes(app.status.toLowerCase()));
   const width = window.innerWidth;
