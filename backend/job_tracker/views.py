@@ -374,40 +374,44 @@ class ResumeTemplateViewSet(viewsets.ModelViewSet):
         # Format projects
         proj_text = ""
         for proj in projects:
-            # Format project name with technologies on same line
-            if proj.technologies:
-                proj_text += f"### {proj.name} | {proj.technologies}\n"
+            # Format project name with technologies on same line, make title clickable if URL exists
+            if proj.url:
+                if proj.technologies:
+                    proj_text += f"### [{proj.name}]({proj.url}) | {proj.technologies}\n"
+                else:
+                    proj_text += f"### [{proj.name}]({proj.url})\n"
             else:
-                proj_text += f"### {proj.name}\n"
+                if proj.technologies:
+                    proj_text += f"### {proj.name} | {proj.technologies}\n"
+                else:
+                    proj_text += f"### {proj.name}\n"
             
             if proj.is_ongoing:
                 proj_text += f"**{proj.start_date.strftime('%B %Y')} - Present**\n"
             else:
                 proj_text += f"**{proj.start_date.strftime('%B %Y')} - {proj.end_date.strftime('%B %Y') if proj.end_date else 'Present'}**\n"
             proj_text += f"{proj.description}\n"
-            if proj.url:
-                proj_text += f"[View Project]({proj.url})\n"
             proj_text += "\n"
         
         # Generate full Markdown
-        markdown = f"""# {template.name}
-{template.email} | {template.phone} | {template.city}
-
-## Work Experience
-{exp_text if exp_text else "No work experience added yet."}
-
-## Education
-{edu_text if edu_text else "No education added yet."}
-
-## Projects
-{proj_text if proj_text else "No projects added yet."}
-
-## Skills
-{template.skills if template.skills else "No skills added yet."}
-
-## Professional Summary
-{template.summary if template.summary else "No summary added yet."}
-"""
+        markdown = f"# {template.name}\n"
+        markdown += f"{template.email} | {template.phone} | {template.city}\n\n"
+        
+        # Only include sections that have content
+        if exp_text.strip():
+            markdown += f"## Work Experience\n{exp_text}\n"
+        
+        if edu_text.strip():
+            markdown += f"## Education\n{edu_text}\n"
+        
+        if proj_text.strip():
+            markdown += f"## Projects\n{proj_text}\n"
+        
+        if template.skills and template.skills.strip():
+            markdown += f"## Skills\n{template.skills}\n\n"
+        
+        if template.summary and template.summary.strip():
+            markdown += f"## Professional Summary\n{template.summary}\n"
         
         return markdown
     

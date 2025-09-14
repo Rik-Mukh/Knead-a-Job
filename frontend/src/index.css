@@ -231,6 +231,12 @@ code {
   text-decoration: underline;
 }
 
+/* Ensure links in h3 elements (project titles) maintain h3 font size */
+.resume-content h3 a {
+  font-size: 14px;
+  font-weight: bold;
+}
+
 .resume-content strong {
   color: #000;
   font-weight: bold;
@@ -339,6 +345,12 @@ code {
   .resume-content a {
     font-size: 13px !important;
     text-decoration: underline !important;
+  }
+
+  /* Ensure links in h3 elements (project titles) maintain h3 font size in PDF */
+  .resume-content h3 a {
+    font-size: 14px !important;
+    font-weight: bold !important;
   }
 }
 
