@@ -18,7 +18,7 @@ const STATUS_MAP = {
 
 // Statistic cards mapping
 const STATCARD_MAP = {
-  applied: { label: "Job", color: "#EFEFEF" },
+  applied: { label: "Applications", color: "#EFEFEF" },
   interview: { label: "Interview", color: "#C8F1FF" },
   rejected: { label: "Rejection", color: "#FFCDCD" },
   offer: { label: "Offer", color: "#E1FFCD" },
@@ -119,7 +119,7 @@ const Dashboard = () => {
     try {
       const statsData = await applicationService.getStats();
       setStats({
-        applied: statsData.applied,
+        applied: statsData.total,
         interviews: statsData.interview,
         rejected: statsData.rejected,
         offers: statsData.accepted,
