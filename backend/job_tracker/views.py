@@ -374,14 +374,17 @@ class ResumeTemplateViewSet(viewsets.ModelViewSet):
         # Format projects
         proj_text = ""
         for proj in projects:
-            proj_text += f"### {proj.name}\n"
+            # Format project name with technologies on same line
+            if proj.technologies:
+                proj_text += f"### {proj.name} | {proj.technologies}\n"
+            else:
+                proj_text += f"### {proj.name}\n"
+            
             if proj.is_ongoing:
                 proj_text += f"**{proj.start_date.strftime('%B %Y')} - Present**\n"
             else:
                 proj_text += f"**{proj.start_date.strftime('%B %Y')} - {proj.end_date.strftime('%B %Y') if proj.end_date else 'Present'}**\n"
             proj_text += f"{proj.description}\n"
-            if proj.technologies:
-                proj_text += f"*Technologies: {proj.technologies}*\n"
             if proj.url:
                 proj_text += f"[View Project]({proj.url})\n"
             proj_text += "\n"
