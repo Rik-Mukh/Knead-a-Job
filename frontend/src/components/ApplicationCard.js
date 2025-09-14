@@ -154,6 +154,7 @@ const ApplicationCard = ({ application, onEdit, onDelete, onTrack, onAddMeetingM
           </button>
         </div>
       </div>
+
     </div>
   )
 };

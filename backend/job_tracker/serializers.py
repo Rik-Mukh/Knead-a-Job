@@ -311,6 +311,9 @@ class ResumeTemplateCreateSerializer(serializers.ModelSerializer):
         template.save()
         return template
 
+class MatchRequestSerializer(serializers.Serializer):
+    job_description = serializers.CharField()
 
-
-
+class MatchResponseSerializer(serializers.Serializer):
+    score = serializers.FloatField()
+    missing_keywords = serializers.ListField(child=serializers.CharField())

@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import gmailService from '../services/gmailService';
-
+import { useLocation } from 'react-router-dom';
 const GmailMessages = () => {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const location = useLocation();
+  const { applicationId, company, role, email } = location.state || {};
 
   const fetchMessages = async () => {
         try {

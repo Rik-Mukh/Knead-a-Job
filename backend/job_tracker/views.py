@@ -7,7 +7,7 @@ Views handle HTTP requests and return appropriate responses for job applications
 
 
 from django.contrib.auth.models import User
-
+from rest_framework.views import APIView
 from rest_framework import viewsets, permissions, status, views, serializers
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.response import Response
@@ -15,8 +15,9 @@ from .models import JobApplication, ResumeTemplate, Experience, Project, Educati
 from django.db import models
 from django.utils import timezone
 from datetime import timedelta
+from .services.match import compute_match_score
 from .serializers import (
-    ResumeTemplateSerializer, JobApplicationListSerializer, JobApplicationDetailSerializer, UserSerializer,
+    ResumeTemplateSerializer, JobApplicationListSerializer, JobApplicationDetailSerializer, UserSerializer, MatchRequestSerializer, MatchResponseSerializer,
     ResumeTemplateCreateSerializer, ExperienceSerializer, ProjectSerializer, EducationSerializer, MeetingNoteSerializer, NotificationSerializer
 )
 import openai
@@ -921,3 +922,15 @@ Return only the summary text, no additional formatting or explanations."""
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 
+
+class MatchScoreView(APIView):
+    permission_classes = [permissions.AllowAny]   # tighten if needed
+
+    def post(self, request):
+        serializer = MatchRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        jd_text = serializer.validated_data["job_description"]
+
+        result = compute_match_score(user=request.user, jd_text=jd_text)
+
+        return Response(result, status=status.HTTP_200_OK)

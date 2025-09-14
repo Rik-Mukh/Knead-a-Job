@@ -62,6 +62,7 @@ db.sqlite3
 db.sqlite3-journal
 backend/jobtracker/settings.py
 backend/requirements.txt
+backend/job_tracker/migrations
 
 # Flask stuff:
 instance/
