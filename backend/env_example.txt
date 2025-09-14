@@ -1,0 +1,7 @@
+# OpenAI API Configuration
+# Get your API key from: https://platform.openai.com/api-keys
+OPENAI_API_KEY=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
+
+# Django Configuration (optional)
+# SECRET_KEY=your-secret-key-here
+# DEBUG=True

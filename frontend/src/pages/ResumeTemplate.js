@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { marked } from 'marked';
 import html2pdf from 'html2pdf.js';
 import { resumeTemplateService } from '../services/resumeTemplateService';
+import { aiService } from '../services/aiService';
 
 const ResumeTemplate = () => {
   const [template, setTemplate] = useState(null);
@@ -15,6 +16,13 @@ const ResumeTemplate = () => {
   const [resumeHtml, setResumeHtml] = useState('');
   const [isEditMode, setIsEditMode] = useState(false);
   const [customMarkdown, setCustomMarkdown] = useState('');
+  
+  // AI Generation states
+  const [aiGenerating, setAiGenerating] = useState({
+    project: {},
+    experience: {},
+    summary: false
+  });
 
   // Form states
   const [formData, setFormData] = useState({
@@ -319,6 +327,112 @@ const ResumeTemplate = () => {
     }
   };
 
+  // AI Generation Functions
+  const handleGenerateProjectDescription = async (project, index) => {
+    if (!project.name) {
+      alert('Please enter a project name before generating a description.');
+      return;
+    }
+
+    try {
+      setAiGenerating(prev => ({
+        ...prev,
+        project: { ...prev.project, [index]: true }
+      }));
+
+      const data = {
+        project_name: project.name,
+        technologies: project.technologies || '',
+        existing_description: project.description || ''
+      };
+
+      const generatedDescription = await aiService.generateProjectDescription(data);
+      
+      // Update the project description
+      handleUpdateProject(index, 'description', generatedDescription);
+      
+    } catch (error) {
+      console.error('Error generating project description:', error);
+      alert('Error generating project description: ' + error.message);
+    } finally {
+      setAiGenerating(prev => ({
+        ...prev,
+        project: { ...prev.project, [index]: false }
+      }));
+    }
+  };
+
+  const handleGenerateExperienceSummary = async (experience, index) => {
+    if (!experience.company || !experience.position) {
+      alert('Please enter company and position before generating a summary.');
+      return;
+    }
+
+    if (!experience.description || experience.description.length < 500) {
+      alert('Please provide at least 500 characters of experience description before generating AI content.');
+      return;
+    }
+
+    try {
+      setAiGenerating(prev => ({
+        ...prev,
+        experience: { ...prev.experience, [index]: true }
+      }));
+
+      const data = {
+        company: experience.company,
+        position: experience.position,
+        existing_description: experience.description
+      };
+
+      const generatedDescription = await aiService.generateExperienceSummary(data);
+      
+      // Update the experience description
+      handleUpdateExperience(index, 'description', generatedDescription);
+      
+    } catch (error) {
+      console.error('Error generating experience summary:', error);
+      alert('Error generating experience summary: ' + error.message);
+    } finally {
+      setAiGenerating(prev => ({
+        ...prev,
+        experience: { ...prev.experience, [index]: false }
+      }));
+    }
+  };
+
+  const handleGeneratePersonalSummary = async () => {
+    try {
+      setAiGenerating(prev => ({
+        ...prev,
+        summary: true
+      }));
+
+      const data = {
+        existing_summary: formData.summary || '',
+        name: formData.name || '',
+        skills: formData.skills || ''
+      };
+
+      const generatedSummary = await aiService.generatePersonalSummary(data);
+      
+      // Update the personal summary
+      setFormData(prev => ({
+        ...prev,
+        summary: generatedSummary
+      }));
+      
+    } catch (error) {
+      console.error('Error generating personal summary:', error);
+      alert('Error generating personal summary: ' + error.message);
+    } finally {
+      setAiGenerating(prev => ({
+        ...prev,
+        summary: false
+      }));
+    }
+  };
+
   const handleAddEducation = () => {
     const newEducation = {
       institution: '',
@@ -602,7 +716,18 @@ const ResumeTemplate = () => {
             />
           </div>
           <div style={{ marginBottom: '16px' }}>
-            <label>Professional Summary</label>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+              <label>Professional Summary</label>
+              <button
+                type="button"
+                className="btn btn-outline-primary btn-sm"
+                onClick={handleGeneratePersonalSummary}
+                disabled={aiGenerating.summary}
+                style={{ fontSize: '12px' }}
+              >
+                {aiGenerating.summary ? '🤖 Generating...' : '🤖 AI Generate'}
+              </button>
+            </div>
             <textarea
               name="summary"
               value={formData.summary}
@@ -611,6 +736,9 @@ const ResumeTemplate = () => {
               rows="4"
               placeholder="Brief summary of your professional background and career objectives..."
             />
+            <small style={{ color: '#666', fontSize: '11px' }}>
+              AI will use your name and skills to generate or enhance your summary
+            </small>
           </div>
           <div>
             <label>Skills (one per line or comma-separated)</label>
@@ -707,7 +835,18 @@ const ResumeTemplate = () => {
                 </div>
               </div>
               <div style={{ marginBottom: '16px' }}>
-                <label>Description *</label>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                  <label>Description *</label>
+                  <button
+                    type="button"
+                    className="btn btn-outline-primary btn-sm"
+                    onClick={() => handleGenerateExperienceSummary(exp, index)}
+                    disabled={aiGenerating.experience[index] || !exp.company || !exp.position || (exp.description && exp.description.length < 500)}
+                    style={{ fontSize: '12px' }}
+                  >
+                    {aiGenerating.experience[index] ? '🤖 Generating...' : '🤖 AI Generate'}
+                  </button>
+                </div>
                 <textarea
                   value={exp.description}
                   onChange={(e) => handleUpdateExperience(index, 'description', e.target.value)}
@@ -715,6 +854,15 @@ const ResumeTemplate = () => {
                   rows="3"
                   placeholder="Describe your responsibilities and achievements..."
                 />
+                <div style={{ fontSize: '11px', color: '#666', marginTop: '4px' }}>
+                  {!exp.company || !exp.position ? (
+                    <span>Enter company and position to enable AI generation</span>
+                  ) : exp.description && exp.description.length < 500 ? (
+                    <span>Provide at least 500 characters ({exp.description.length}/500) to enable AI generation</span>
+                  ) : (
+                    <span>Ready for AI generation</span>
+                  )}
+                </div>
               </div>
               <div style={{ display: 'flex', gap: '8px' }}>
                 <button 
@@ -834,7 +982,18 @@ const ResumeTemplate = () => {
                 </div>
               </div>
               <div style={{ marginBottom: '16px' }}>
-                <label>Description *</label>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                  <label>Description *</label>
+                  <button
+                    type="button"
+                    className="btn btn-outline-primary btn-sm"
+                    onClick={() => handleGenerateProjectDescription(project, index)}
+                    disabled={aiGenerating.project[index] || !project.name}
+                    style={{ fontSize: '12px' }}
+                  >
+                    {aiGenerating.project[index] ? '🤖 Generating...' : '🤖 AI Generate'}
+                  </button>
+                </div>
                 <textarea
                   value={project.description}
                   onChange={(e) => handleUpdateProject(index, 'description', e.target.value)}
@@ -842,6 +1001,11 @@ const ResumeTemplate = () => {
                   rows="3"
                   placeholder="Describe the project, your role, and key achievements..."
                 />
+                {!project.name && (
+                  <small style={{ color: '#666', fontSize: '11px' }}>
+                    Enter a project name to enable AI generation
+                  </small>
+                )}
               </div>
               <div style={{ display: 'flex', gap: '8px' }}>
                 <button 
