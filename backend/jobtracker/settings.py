@@ -164,11 +164,7 @@ REST_FRAMEWORK = {
     ],
 }
 
-<<<<<<< Updated upstream
-SITE_ID = 2
-=======
 SITE_ID = 4
->>>>>>> Stashed changes
 
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
