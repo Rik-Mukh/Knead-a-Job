@@ -543,8 +543,23 @@ class ProjectViewSet(viewsets.ModelViewSet):
         """Return all projects - no template filtering needed."""
         return Project.objects.all()
     
+    def create(self, request, *args, **kwargs):
+        """Create a new project with debug logging."""
+        print(f"DEBUG: ProjectViewSet.create called")
+        print(f"DEBUG: Request data: {request.data}")
+        print(f"DEBUG: Request method: {request.method}")
+        print(f"DEBUG: Content type: {request.content_type}")
+        
+        try:
+            return super().create(request, *args, **kwargs)
+        except Exception as e:
+            print(f"DEBUG: Exception in create: {e}")
+            print(f"DEBUG: Exception type: {type(e)}")
+            raise
+    
     def perform_create(self, serializer):
         """Create a new project entry - no template linking needed."""
+        print(f"DEBUG: perform_create called with serializer data: {serializer.validated_data}")
         serializer.save()
 
 
