@@ -63,7 +63,12 @@ export const applicationService = {
    * @returns {Promise<Object>} Updated job application object
    */
   async update(id, data) {
-    const response = await axios.put(`${API_BASE_URL}${id}/`, data);
+    // Attach client-side event timestamp (ISO string with timezone if available)
+    // and timezone offset (in minutes, e.g., -420 for PDT)
+    const client_event_timestamp = new Date().toISOString();
+    const timezone_offset_minutes = new Date().getTimezoneOffset();
+    const payload = { ...data, client_event_timestamp, timezone_offset_minutes };
+    const response = await axios.put(`${API_BASE_URL}${id}/`, payload);
     return response.data;
   },
 

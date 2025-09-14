@@ -130,24 +130,55 @@ class JobApplicationViewSet(viewsets.ModelViewSet):
 
     def update(self, request, *args, **kwargs):
         """
-        Override update method to trigger notifications when status changes.
+        Override update method to track status changes with timestamps and trigger notifications.
         """
         instance = self.get_object()
         old_status = instance.status
+        new_status = request.data.get('status', old_status)
         
-        print(f"DEBUG: Updating job application {instance.id} from status '{old_status}' to '{request.data.get('status', 'unknown')}'")
+        print(f"DEBUG: Updating job application {instance.id} from status '{old_status}' to '{new_status}'")
+        
+        # Track status change timestamps
+        if old_status != new_status:
+            # Prefer client-provided timestamp (user's local time) if available; fallback to server time
+            from django.utils.dateparse import parse_datetime
+            client_ts_str = request.data.get('client_event_timestamp') or request.data.get('client_timestamp')
+            event_dt = timezone.now()
+            if client_ts_str:
+                parsed = parse_datetime(client_ts_str)
+                if parsed:
+                    if timezone.is_naive(parsed):
+                        parsed = timezone.make_aware(parsed, timezone.get_current_timezone())
+                    event_dt = parsed
+            
+            # Set the appropriate datetime field based on the new status
+            if new_status == 'interview' and not instance.interview_date:
+                instance.interview_date = event_dt
+                print(f"DEBUG: Set interview_date to {event_dt}")
+            elif new_status == 'rejected' and not instance.rejected_date:
+                instance.rejected_date = event_dt
+                print(f"DEBUG: Set rejected_date to {event_dt}")
+            elif new_status == 'accepted' and not instance.accepted_date:
+                instance.accepted_date = event_dt
+                print(f"DEBUG: Set accepted_date to {event_dt}")
+            elif new_status == 'withdrawn' and not instance.withdrawn_date:
+                instance.withdrawn_date = event_dt
+                print(f"DEBUG: Set withdrawn_date to {event_dt}")
+            
+            # Save the instance with the new datetime field
+            instance.save()
         
         # Call the parent update method
         response = super().update(request, *args, **kwargs)
         
         # Refresh the instance to get the updated status
         instance.refresh_from_db()
-        new_status = instance.status
+        final_status = instance.status
         
-        print(f"DEBUG: Status changed from '{old_status}' to '{new_status}'")
+        print(f"DEBUG: Final status after update: '{final_status}'")
         
         # Check if status changed from 'applied' to 'interview'
-        if old_status == 'applied' and new_status == 'interview':
+        if old_status == 'applied' and final_status == 'interview':
             print("DEBUG: Creating notifications for status change to interview")
             
             # Create immediate notification (show now)
@@ -169,7 +200,7 @@ class JobApplicationViewSet(viewsets.ModelViewSet):
             )
             print("DEBUG: Created future notification")
         else:
-            print(f"DEBUG: No notification needed - status change from '{old_status}' to '{new_status}'")
+            print(f"DEBUG: No notification needed - status change from '{old_status}' to '{final_status}'")
         
         return response
 
@@ -374,37 +405,71 @@ class ResumeTemplateViewSet(viewsets.ModelViewSet):
         # Format projects
         proj_text = ""
         for proj in projects:
-            proj_text += f"### {proj.name}\n"
+            # Format project name with technologies on same line, make title clickable if URL exists
+            if proj.url:
+                if proj.technologies:
+                    proj_text += f"### [{proj.name}]({proj.url}) | {proj.technologies}\n"
+                else:
+                    proj_text += f"### [{proj.name}]({proj.url})\n"
+            else:
+                if proj.technologies:
+                    proj_text += f"### {proj.name} | {proj.technologies}\n"
+                else:
+                    proj_text += f"### {proj.name}\n"
+            
             if proj.is_ongoing:
                 proj_text += f"**{proj.start_date.strftime('%B %Y')} - Present**\n"
             else:
                 proj_text += f"**{proj.start_date.strftime('%B %Y')} - {proj.end_date.strftime('%B %Y') if proj.end_date else 'Present'}**\n"
             proj_text += f"{proj.description}\n"
-            if proj.technologies:
-                proj_text += f"*Technologies: {proj.technologies}*\n"
-            if proj.url:
-                proj_text += f"[View Project]({proj.url})\n"
             proj_text += "\n"
         
         # Generate full Markdown
-        markdown = f"""# {template.name}
-{template.email} | {template.phone} | {template.city}
-
-## Work Experience
-{exp_text if exp_text else "No work experience added yet."}
-
-## Education
-{edu_text if edu_text else "No education added yet."}
-
-## Projects
-{proj_text if proj_text else "No projects added yet."}
-
-## Skills
-{template.skills if template.skills else "No skills added yet."}
-
-## Professional Summary
-{template.summary if template.summary else "No summary added yet."}
-"""
+        markdown = f"# {template.name}\n"
+        
+        # Build contact information line
+        contact_parts = [template.email, template.phone, template.city]
+        
+        # Add links if they exist
+        if template.links and template.links.strip():
+            # Split links by newline and filter out empty lines
+            raw_links = [link.strip() for link in template.links.split('\n') if link.strip()]
+            
+            # Process links to make GitHub and LinkedIn display as text
+            processed_links = []
+            for link in raw_links:
+                # Ensure link has protocol
+                if not link.startswith(('http://', 'https://')):
+                    link = 'https://' + link
+                
+                # Check if it's GitHub or LinkedIn and format accordingly
+                if 'github.com' in link.lower():
+                    processed_links.append(f"[GitHub]({link})")
+                elif 'linkedin.com' in link.lower():
+                    processed_links.append(f"[LinkedIn]({link})")
+                else:
+                    # For other links, keep the original URL
+                    processed_links.append(link)
+            
+            contact_parts.extend(processed_links)
+        
+        markdown += " | ".join(contact_parts) + "\n\n"
+        
+        # Only include sections that have content
+        if exp_text.strip():
+            markdown += f"## Work Experience\n{exp_text}\n"
+        
+        if edu_text.strip():
+            markdown += f"## Education\n{edu_text}\n"
+        
+        if proj_text.strip():
+            markdown += f"## Projects\n{proj_text}\n"
+        
+        if template.skills and template.skills.strip():
+            markdown += f"## Skills\n{template.skills}\n\n"
+        
+        if template.summary and template.summary.strip():
+            markdown += f"## Professional Summary\n{template.summary}\n"
         
         return markdown
     

@@ -193,7 +193,7 @@ const JobApplications = () => {
         <div
           style={{
             marginTop: '40px',
-            border: '1.5px solid black',
+            border: 'none',
             borderRadius: '24px',
             padding: '24px',
             backgroundColor: '#fff',
