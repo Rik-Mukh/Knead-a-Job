@@ -153,14 +153,15 @@ const ResumeTemplate = () => {
 
   const revertToGenerated = async () => {
     try {
-      const response = await resumeTemplateService.generateResume();
+      // Use generateFreshResume to get content from database, not custom markdown
+      const response = await resumeTemplateService.generateFreshResume();
       setResumeMarkdown(response.markdown);
       setCustomMarkdown(response.markdown);
       
       const html = marked(response.markdown, { breaks: true });
       setResumeHtml(html);
       
-      alert('Reverted to auto-generated resume');
+      alert('Reverted to auto-generated resume from database');
     } catch (error) {
       console.error('Error reverting resume:', error);
       alert('Error reverting resume: ' + error.message);
