@@ -5,8 +5,10 @@ import JobApplicationForm from '../components/JobApplicationForm';
 import MeetingMinutesForm from '../components/MeetingMinutesForm';
 import SankeyDiagram from '../components/SankeyDiagram';
 import { processApplicationsForSankey } from '../utils/sankeyDataProcessor';
+import { useNavigate } from 'react-router-dom';
 
 const JobApplications = () => {
+  const navigate = useNavigate();
   const [applications, setApplications] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [editingApplication, setEditingApplication] = useState(null);
@@ -73,6 +75,14 @@ const JobApplications = () => {
   };
 
   const handleTrackApplication = (application) => {
+    navigate('/gmail', {
+      state: {
+        applicationId: application.id,
+        company: application.company,      // or application.company_name
+        role: application.position,        // or application.title
+        email: application.contact_email,  // if you store it
+      },
+    });
     setSelectedApplicationForTracking(application);
     setShowForm(false);
     setEditingApplication(null);
@@ -109,7 +119,7 @@ const JobApplications = () => {
     <div style={{ padding: '20px' }}>
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-        <h1 style={{font: "normal 500 2.5rem helvetica-neue-lt-pro"}}>Job Applications</h1>
+        <h1 style={{ font: 'normal 500 2.5rem helvetica-neue-lt-pro' }}>Job Applications</h1>
         <button onClick={() => setShowForm(true)} className="btn btn-primary">
           Add Application
         </button>
@@ -122,7 +132,7 @@ const JobApplications = () => {
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
           className="form-control"
-          style={{ width: '200px', display: 'inline-block',}}
+          style={{ width: '200px', display: 'inline-block' }}
         >
           <option value="all">All</option>
           <option value="applied">Applied</option>
@@ -156,9 +166,7 @@ const JobApplications = () => {
           }}
         >
           {filteredApplications.map((application) => (
-            <div
-              key={application.id}
-            >
+            <div key={application.id}>
               <ApplicationCard
                 application={application}
                 onEdit={handleEdit}
@@ -178,10 +186,7 @@ const JobApplications = () => {
               : `No applications with status '${statusFilter}' found.`}
           </p>
           {statusFilter === 'all' && (
-            <button
-              onClick={() => setShowForm(true)}
-              className="btn btn-primary"
-            >
+            <button onClick={() => setShowForm(true)} className="btn btn-primary">
               Add Your First Application
             </button>
           )}
