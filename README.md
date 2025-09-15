@@ -1,4 +1,4 @@
-# Job Tracker
+# Knead a Job?
 
 A full-stack web application for tracking job applications and managing resumes, built with Django REST Framework backend and React frontend.
 
